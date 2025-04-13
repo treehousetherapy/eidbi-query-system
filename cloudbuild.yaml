@@ -1,0 +1,92 @@
+# eidbi-query-system/cloudbuild.yaml
+
+steps:
+  # --- Build Backend Image ---
+  - name: 'gcr.io/cloud-builders/docker'
+    args: [
+        'build',
+        '-t', 'gcr.io/$PROJECT_ID/eidbi-backend:latest',
+        '-t', 'gcr.io/$PROJECT_ID/eidbi-backend:$SHORT_SHA',
+        '.' # Context directory
+      ]
+    dir: 'backend' # Run docker build in the backend directory
+    id: 'build-backend'
+
+  # --- Build Frontend Image ---
+  - name: 'gcr.io/cloud-builders/docker'
+    args: [
+        'build',
+        '-t', 'gcr.io/$PROJECT_ID/eidbi-frontend:latest',
+        '-t', 'gcr.io/$PROJECT_ID/eidbi-frontend:$SHORT_SHA',
+        '.'
+      ]
+    dir: 'frontend' # Run docker build in the frontend directory
+    id: 'build-frontend'
+
+  # --- Push Backend Image ---
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['push', 'gcr.io/$PROJECT_ID/eidbi-backend:latest']
+    waitFor: ['build-backend']
+    id: 'push-backend-latest'
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['push', 'gcr.io/$PROJECT_ID/eidbi-backend:$SHORT_SHA']
+    waitFor: ['build-backend']
+    id: 'push-backend-sha'
+
+  # --- Push Frontend Image ---
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['push', 'gcr.io/$PROJECT_ID/eidbi-frontend:latest']
+    waitFor: ['build-frontend']
+    id: 'push-frontend-latest'
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['push', 'gcr.io/$PROJECT_ID/eidbi-frontend:$SHORT_SHA']
+    waitFor: ['build-frontend']
+    id: 'push-frontend-sha'
+
+  # --- Deploy Backend to Cloud Run ---
+  # Requires Cloud Run service 'eidbi-backend-service' to exist
+  # Requires appropriate service account permissions for Cloud Build
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    entrypoint: gcloud
+    args: [
+        'run', 'deploy', 'eidbi-backend-service',
+        '--image', 'gcr.io/$PROJECT_ID/eidbi-backend:$SHORT_SHA',
+        '--region', '${_REGION:-us-central1}', # Use substitution or default
+        '--platform', 'managed',
+        '--allow-unauthenticated', # Or configure authentication
+        '--quiet'
+      ]
+    waitFor: ['push-backend-sha']
+    id: 'deploy-backend'
+
+  # --- Deploy Frontend to Cloud Run ---
+  # Requires Cloud Run service 'eidbi-frontend-service' to exist
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    entrypoint: gcloud
+    args: [
+        'run', 'deploy', 'eidbi-frontend-service',
+        '--image', 'gcr.io/$PROJECT_ID/eidbi-frontend:$SHORT_SHA',
+        '--region', '${_REGION:-us-central1}',
+        '--platform', 'managed',
+        '--allow-unauthenticated',
+        # Pass backend URL as env var (replace with deployed backend URL)
+        # This needs to be the actual URL of the deployed backend service
+        '--set-env-vars', 'BACKEND_URL=YOUR_DEPLOYED_BACKEND_URL_HERE',
+        '--quiet'
+      ]
+    waitFor: ['push-frontend-sha', 'deploy-backend'] # Wait for backend to deploy
+    id: 'deploy-frontend'
+
+# Define images to push to Google Container Registry (GCR) or Artifact Registry
+images:
+  - 'gcr.io/$PROJECT_ID/eidbi-backend:latest'
+  - 'gcr.io/$PROJECT_ID/eidbi-backend:$SHORT_SHA'
+  - 'gcr.io/$PROJECT_ID/eidbi-frontend:latest'
+  - 'gcr.io/$PROJECT_ID/eidbi-frontend:$SHORT_SHA'
+
+# Optional: Define substitutions
+# substitutions:
+#   _REGION: us-central1
+
+options:
+  logging: CLOUD_LOGGING_ONLY 

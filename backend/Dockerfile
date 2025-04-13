@@ -1,0 +1,34 @@
+# eidbi-query-system/backend/Dockerfile
+
+# Use official Python runtime as a parent image
+FROM python:3.11-slim
+
+# Set environment variables
+ENV PYTHONDONTWRITEBYTECODE 1
+ENV PYTHONUNBUFFERED 1
+# Set the working directory in the container
+WORKDIR /app
+
+# Install system dependencies if needed (e.g., for certain libraries)
+# RUN apt-get update && apt-get install -y --no-install-recommends some-package && rm -rf /var/lib/apt/lists/*
+
+# Install Python dependencies
+# Copy only requirements first to leverage Docker cache
+COPY requirements.txt .
+RUN pip install --no-cache-dir --upgrade pip
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Copy the rest of the backend application code
+# Make sure .dockerignore excludes venv, __pycache__, etc.
+COPY . .
+
+# Make port 8000 available to the world outside this container
+# Cloud Run uses the PORT env var, but exposing is good practice.
+EXPOSE 8000
+
+# Define environment variable for the port (Cloud Run sets this automatically)
+ENV PORT 8000
+
+# Run the application using Uvicorn
+# exec allows signals to be passed correctly
+CMD exec uvicorn main:app --host 0.0.0.0 --port ${PORT} 
