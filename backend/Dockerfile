@@ -6,6 +6,7 @@ FROM python:3.11-slim
 # Set environment variables
 ENV PYTHONDONTWRITEBYTECODE 1
 ENV PYTHONUNBUFFERED 1
+
 # Set the working directory in the container
 WORKDIR /app
 
@@ -22,12 +23,11 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Make sure .dockerignore excludes venv, __pycache__, etc.
 COPY . .
 
-# Make port 8000 available to the world outside this container
-# Cloud Run uses the PORT env var, but exposing is good practice.
-EXPOSE 8000
+# Cloud Run sets the PORT environment variable automatically
+ENV PORT 8080
 
-# Define environment variable for the port (Cloud Run sets this automatically)
-ENV PORT 8000
+# Make port available to the world outside this container
+EXPOSE ${PORT}
 
 # Run the application using Uvicorn
 # exec allows signals to be passed correctly
