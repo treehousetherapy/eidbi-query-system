@@ -1,0 +1,26 @@
+# EIDBI Query System Production Configuration
+
+# API Settings
+api:
+  host: 0.0.0.0
+  port: 8000
+  debug: false
+  prefix: /api/v1
+
+# Streamlit Settings
+streamlit:
+  page_title: EIDBI Query System
+  page_icon: 📚
+  layout: wide
+
+# App Settings
+app:
+  cache_ttl: 86400 # 24 hours
+  max_upload_size: 20971520 # 20MB
+  log_level: INFO
+
+# Vector DB Settings
+vector_db:
+  num_neighbors: 8
+  similarity_threshold: 0.6
+  use_local_fallback: true 

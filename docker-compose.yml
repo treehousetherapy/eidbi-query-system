@@ -1,0 +1,42 @@
+version: '3.8'
+
+services:
+  backend:
+    build: 
+      context: .
+      dockerfile: backend/Dockerfile
+    container_name: eidbi-backend
+    ports:
+      - "8000:8000"
+    environment:
+      - HOST=0.0.0.0
+      - PORT=8000
+      - GCP_PROJECT_ID=${GCP_PROJECT_ID:-mock-project-id}
+      - GCP_BUCKET_NAME=${GCP_BUCKET_NAME:-mock-bucket-name}
+      - GCP_REGION=${GCP_REGION:-us-central1}
+    volumes:
+      - ./scraper:/app/scraper
+      - ./config:/app/config
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+  frontend:
+    build:
+      context: .
+      dockerfile: frontend/Dockerfile
+    container_name: eidbi-frontend
+    ports:
+      - "8501:8501"
+    environment:
+      - BACKEND_URL=http://backend:8000
+      - DEFAULT_NUM_RESULTS=3
+      - MAX_NUM_RESULTS=10
+      - REQUEST_TIMEOUT=30
+    depends_on:
+      - backend
+    restart: unless-stopped 

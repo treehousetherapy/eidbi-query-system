@@ -71,7 +71,7 @@ steps:
         '--allow-unauthenticated',
         # Pass backend URL as env var (replace with deployed backend URL)
         # This needs to be the actual URL of the deployed backend service
-        '--set-env-vars', 'BACKEND_URL=YOUR_DEPLOYED_BACKEND_URL_HERE',
+        '--set-env-vars', 'BACKEND_URL=',
         '--quiet'
       ]
     waitFor: ['push-frontend-sha', 'deploy-backend'] # Wait for backend to deploy
@@ -90,3 +90,4 @@ images:
 
 options:
   logging: CLOUD_LOGGING_ONLY 
+

@@ -2,6 +2,7 @@
 
 import logging
 import json
+import os
 from typing import Dict, Any, Optional
 from google.cloud import storage
 from google.cloud.exceptions import GoogleCloudError
@@ -35,119 +36,102 @@ def _get_gcs_bucket(bucket_name: str) -> Optional[storage.Bucket]:
         return None
 
 
-def upload_string_to_gcs(
-    data_string: str,
-    bucket_name: str,
-    destination_blob_name: str,
-    content_type: str = 'text/plain' # Default to text, change as needed (e.g., 'application/jsonl')
-) -> bool:
+def upload_string_to_gcs(data_string: str, bucket_name: str, destination_blob_name: str, content_type: str = 'text/plain') -> bool:
     """
-    Uploads a string directly to a GCS bucket.
-
+    Mock implementation that saves string data to a local file instead of uploading to GCS.
+    
     Args:
-        data_string: The string data to upload.
-        bucket_name: The name of the target GCS bucket.
-        destination_blob_name: The desired path/name for the file within the bucket.
-        content_type: The content type of the uploaded file.
-
+        data_string: The string data to store
+        bucket_name: Unused - would be the GCS bucket name in real implementation
+        destination_blob_name: Used as the local filename
+        content_type: Unused - would specify the content type in real implementation
+        
     Returns:
-        True if the upload was successful, False otherwise.
+        bool: True if successful, False otherwise
     """
-    bucket = _get_gcs_bucket(bucket_name)
-    if not bucket:
-        return False
-
     try:
-        # Create a blob object
-        blob = bucket.blob(destination_blob_name)
-
-        # Upload the string
-        logger.info(f"Uploading string data to gs://{bucket_name}/{destination_blob_name}...")
-        blob.upload_from_string(
-            data=data_string,
-            content_type=content_type
-        )
-
-        logger.info(f"Successfully uploaded to gs://{bucket_name}/{destination_blob_name}")
+        logger.info(f"Mock GCS: Saving string data to local file '{destination_blob_name}'")
+        
+        # Create directory if it doesn't exist
+        os.makedirs('local_gcs_mock', exist_ok=True)
+        local_path = os.path.join('local_gcs_mock', destination_blob_name)
+        
+        # Create directories in the path if they don't exist
+        os.makedirs(os.path.dirname(local_path), exist_ok=True)
+        
+        # Write the data to the file
+        with open(local_path, 'w', encoding='utf-8') as f:
+            f.write(data_string)
+            
+        logger.info(f"Mock GCS: Successfully saved data to '{local_path}'")
         return True
-
-    except GoogleCloudError as e:
-        logger.error(f"GCS Error uploading string to gs://{bucket_name}/{destination_blob_name}: {e}")
-        return False
+        
     except Exception as e:
-        logger.error(f"An unexpected error occurred during string upload to GCS: {e}", exc_info=True)
+        logger.error(f"Mock GCS: Error saving data to local file: {e}", exc_info=True)
         return False
 
 
-def upload_dict_to_gcs(
-    data_dict: Dict[str, Any],
-    bucket_name: str,
-    destination_blob_name: str,
-    content_type: str = 'application/json'
-) -> bool:
+def upload_dict_to_gcs(data_dict: Dict[str, Any], bucket_name: str, destination_blob_name: str) -> bool:
     """
-    Uploads a Python dictionary as a JSON string to a GCS bucket.
-
+    Mock implementation that saves dictionary data as JSON to a local file instead of uploading to GCS.
+    
     Args:
-        data_dict: The Python dictionary to upload.
-        bucket_name: The name of the target GCS bucket.
-        destination_blob_name: The desired path/name for the file within the bucket.
-        content_type: The content type of the uploaded file. Defaults to 'application/json'.
-
+        data_dict: The dictionary to store as JSON
+        bucket_name: Unused - would be the GCS bucket name in real implementation
+        destination_blob_name: Used as the local filename
+        
     Returns:
-        True if the upload was successful, False otherwise.
+        bool: True if successful, False otherwise
     """
     try:
-        # Convert dictionary to JSON string
-        json_data = json.dumps(data_dict, indent=2) # Using indent for readability
-    except TypeError as e:
-        logger.error(f"Failed to serialize dictionary to JSON for GCS upload: {e}")
+        logger.info(f"Mock GCS: Saving dictionary data to local file '{destination_blob_name}'")
+        
+        # Convert dict to JSON string
+        json_str = json.dumps(data_dict, ensure_ascii=False)
+        
+        # Use the string upload function
+        return upload_string_to_gcs(
+            data_string=json_str, 
+            bucket_name=bucket_name,
+            destination_blob_name=destination_blob_name,
+            content_type='application/json'
+        )
+        
+    except Exception as e:
+        logger.error(f"Mock GCS: Error converting dict to JSON or saving: {e}", exc_info=True)
         return False
-
-    # Use the string upload function
-    return upload_string_to_gcs(
-        data_string=json_data,
-        bucket_name=bucket_name,
-        destination_blob_name=destination_blob_name,
-        content_type=content_type
-    )
 
 
 def read_json_from_gcs(bucket_name: str, blob_name: str) -> Optional[Dict[str, Any]]:
     """
-    Reads a JSON file from GCS and parses it into a Python dictionary.
-
+    Mock implementation that reads a JSON file from local storage instead of GCS.
+    
     Args:
-        bucket_name: The name of the GCS bucket.
-        blob_name: The full path/name of the blob within the bucket.
-
+        bucket_name: Unused - would be the GCS bucket name in real implementation
+        blob_name: The local filename to read
+        
     Returns:
-        A dictionary parsed from the JSON file, or None if an error occurs.
+        Dict or None: The JSON content as a dictionary, or None if reading fails
     """
-    bucket = _get_gcs_bucket(bucket_name)
-    if not bucket:
-        return None
-
-    blob = bucket.blob(blob_name)
-
     try:
-        logger.info(f"Reading JSON data from gs://{bucket_name}/{blob_name}...")
-        json_string = blob.download_as_text()
-        data_dict = json.loads(json_string)
-        logger.debug(f"Successfully read and parsed JSON from gs://{bucket_name}/{blob_name}")
-        return data_dict
-
-    except GoogleCloudError as e:
-        if e.code == 404:
-            logger.warning(f"Blob not found in GCS: gs://{bucket_name}/{blob_name}")
-        else:
-            logger.error(f"GCS Error reading blob gs://{bucket_name}/{blob_name}: {e}")
-        return None
-    except json.JSONDecodeError as e:
-        logger.error(f"Failed to decode JSON from blob gs://{bucket_name}/{blob_name}: {e}")
-        return None
+        logger.info(f"Mock GCS: Reading JSON data from local file '{blob_name}'")
+        
+        local_path = os.path.join('local_gcs_mock', blob_name)
+        
+        # Check if file exists
+        if not os.path.exists(local_path):
+            logger.warning(f"Mock GCS: File '{local_path}' does not exist")
+            return None
+            
+        # Read the JSON file
+        with open(local_path, 'r', encoding='utf-8') as f:
+            data = json.load(f)
+            
+        logger.info(f"Mock GCS: Successfully read JSON data from '{local_path}'")
+        return data
+        
     except Exception as e:
-        logger.error(f"An unexpected error occurred reading from GCS: {e}", exc_info=True)
+        logger.error(f"Mock GCS: Error reading JSON from local file: {e}", exc_info=True)
         return None
 
 

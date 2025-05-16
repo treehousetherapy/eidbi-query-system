@@ -5,6 +5,7 @@ from typing import List, Optional, Any
 import yaml
 from pydantic_settings import BaseSettings, SettingsConfigDict
 from pydantic import Field
+import os
 
 # Determine the root directory (eidbi-query-system)
 # This assumes settings.py is in eidbi-query-system/config/
@@ -24,12 +25,11 @@ def load_yaml_config() -> dict:
         return {}
 
 class GCPSettings(BaseSettings):
-    project_id: Optional[str] = Field(None)
-    bucket_name: Optional[str] = Field(None)
-    region: str = "us-central1"
+    project_id: Optional[str] = Field(None, env='GCP_PROJECT_ID')
+    bucket_name: Optional[str] = Field(None, env='GCP_BUCKET_NAME')
+    region: str = Field("us-central1", env='GCP_REGION')
 
     model_config = SettingsConfigDict(
-        env_prefix='GCP_',
         env_file=ROOT_DIR / '.env',
         env_file_encoding='utf-8',
         extra='ignore'
@@ -98,20 +98,22 @@ class Settings(BaseSettings):
         env_file = ROOT_DIR / '.env',
         env_file_encoding='utf-8',
         env_nested_delimiter='__',
+        case_sensitive=True,
         extra='ignore'
     )
 
     @classmethod
     def load_settings(cls) -> 'Settings':
+        """Load settings from YAML and environment variables."""
         yaml_config = load_yaml_config()
-        # Initialize nested settings classes if they are present in YAML
-        # This helps Pydantic v2 handle nested BaseSettings loaded from dict
-        if 'api' in yaml_config: yaml_config['api'] = APISettings(**yaml_config.get('api', {}))
-        if 'gcp' in yaml_config: yaml_config['gcp'] = GCPSettings(**yaml_config.get('gcp', {}))
-        if 'streamlit' in yaml_config: yaml_config['streamlit'] = StreamlitSettings(**yaml_config.get('streamlit', {}))
-        if 'app' in yaml_config: yaml_config['app'] = AppSettings(**yaml_config.get('app', {}))
-        if 'vector_db' in yaml_config: yaml_config['vector_db'] = VectorDBSettings(**yaml_config.get('vector_db', {}))
-
+        
+        # Load GCP settings from environment variables
+        yaml_config['gcp'] = {
+            'project_id': os.getenv('GCP_PROJECT_ID'),
+            'bucket_name': os.getenv('GCP_BUCKET_NAME'),
+            'region': os.getenv('GCP_REGION', 'us-central1')
+        }
+        
         return cls(**yaml_config)
 
 # Create a global settings instance by calling the custom loader

@@ -1,0 +1,18 @@
+# Minnesota DHS EIDBI URLs
+# These URLs were identified through web search as valid links to EIDBI content
+# Last updated: May 11, 2025
+
+# Main EIDBI benefit pages
+https://www.dhs.state.mn.us/main/idcplg?IdcService=GET_DYNAMIC_CONVERSION&RevisionSelectionMethod=LatestReleased&dDocName=dhs16_195658
+https://www.dhs.state.mn.us/main/idcplg?IdcService=GET_DYNAMIC_CONVERSION&RevisionSelectionMethod=LatestReleased&dDocName=DHS-293102
+https://www.dhs.state.mn.us/main/idcplg?IdcService=GET_DYNAMIC_CONVERSION&RevisionSelectionMethod=LatestReleased&dDocName=dhs16_195215
+
+# ASD and EIDBI resource pages
+https://www.dhs.state.mn.us/partners-and-providers/news-initiatives-reports-workgroups/long-term-services-and-supports/eidbi/
+https://mn.gov/autism/
+
+# EIDBI policy and provider resources
+https://www.dhs.state.mn.us/main/idcplg?IdcService=GET_DYNAMIC_CONVERSION&RevisionSelectionMethod=LatestReleased&dDocName=DHS16_195213
+https://www.dhs.state.mn.us/main/idcplg?IdcService=GET_DYNAMIC_CONVERSION&RevisionSelectionMethod=LatestReleased&dDocName=DHS16_195210
+https://www.dhs.state.mn.us/main/idcplg?IdcService=GET_DYNAMIC_CONVERSION&RevisionSelectionMethod=LatestReleased&dDocName=DHS16_195211
+https://www.dhs.state.mn.us/main/idcplg?IdcService=GET_DYNAMIC_CONVERSION&RevisionSelectionMethod=LatestReleased&dDocName=DHS16_195404 
