@@ -1,35 +1,24 @@
-# eidbi-query-system/frontend/Dockerfile
-
-# Use official Python runtime as a parent image
+# Dockerfile for EIDBI Query System Frontend
 FROM python:3.11-slim
 
 # Set environment variables
-ENV PYTHONDONTWRITEBYTECODE 1
-ENV PYTHONUNBUFFERED 1
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONUNBUFFERED=1
 
-# Set the working directory in the container
+# Set working directory
 WORKDIR /app
 
-# Install dependencies
+# Copy and install requirements
 COPY requirements.txt .
-RUN pip install --no-cache-dir --upgrade pip
-RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install --no-cache-dir --upgrade pip && \
+    pip install --no-cache-dir -r requirements.txt
 
-# Copy the Streamlit application code
+# Copy application code
 COPY . .
 
-# Expose the port Streamlit runs on (default is 8501)
-EXPOSE 8501
+# Expose the port Streamlit will run on
+ENV PORT=8501
+EXPOSE ${PORT}
 
-# Define environment variable for the port (Cloud Run uses this)
-# Streamlit also uses SERVER_PORT
-ENV PORT 8501
-ENV SERVER_PORT 8501
-
-# Health check (optional but recommended for Cloud Run)
-HEALTHCHECK --interval=15s --timeout=5s --start-period=30s \
-    CMD curl --fail http://localhost:${PORT}/_stcore/health || exit 1
-
-# Run the Streamlit application
-# Use --server.port and --server.address to bind correctly
-CMD exec streamlit run streamlit_app.py --server.port ${PORT} --server.address=0.0.0.0 --server.enableCORS false 
+# Command to run the application
+CMD streamlit run streamlit_app.py --server.port=${PORT} --server.address=0.0.0.0 

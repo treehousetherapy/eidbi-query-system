@@ -1,15 +1,29 @@
 # eidbi-query-system/cloudbuild.yaml
 
 steps:
-  # Build the container image
+  # Build the backend container image
   - name: 'gcr.io/cloud-builders/docker'
     args: ['build', '-t', 'gcr.io/$PROJECT_ID/eidbi-backend:$COMMIT_SHA', '-f', 'Dockerfile', '.']
+    id: 'build-backend'
 
-  # Push the container image to Container Registry
+  # Push the backend container image
   - name: 'gcr.io/cloud-builders/docker'
     args: ['push', 'gcr.io/$PROJECT_ID/eidbi-backend:$COMMIT_SHA']
+    id: 'push-backend'
+    waitFor: ['build-backend']
 
-  # Deploy container image to Cloud Run
+  # Build the frontend container image
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['build', '-t', 'gcr.io/$PROJECT_ID/eidbi-frontend:$COMMIT_SHA', '-f', 'frontend/Dockerfile', 'frontend/']
+    id: 'build-frontend'
+
+  # Push the frontend container image
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['push', 'gcr.io/$PROJECT_ID/eidbi-frontend:$COMMIT_SHA']
+    id: 'push-frontend'
+    waitFor: ['build-frontend']
+
+  # Deploy backend to Cloud Run
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
     entrypoint: gcloud
     args:
@@ -23,13 +37,46 @@ steps:
       - '--platform'
       - 'managed'
       - '--service-account'
-      - '25849992695-compute@developer.gserviceaccount.com'
+      - 'eidbi-service-account@$PROJECT_ID.iam.gserviceaccount.com'
       - '--set-env-vars'
       - 'GCP_PROJECT_ID=$PROJECT_ID,GCP_REGION=us-central1,GCP_BUCKET_NAME=eidbi-system-bucket-2024'
+    id: 'deploy-backend'
+    waitFor: ['push-backend']
 
-# Define images to push to Google Container Registry (GCR) or Artifact Registry
+  # Get backend URL
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    entrypoint: 'bash'
+    args:
+      - '-c'
+      - |
+        echo "Getting backend URL..."
+        BACKEND_URL=$(gcloud run services describe eidbi-backend-service --region=us-central1 --format="value(status.url)")
+        echo "Backend URL is $BACKEND_URL"
+        echo "$BACKEND_URL" > /workspace/backend_url.txt
+    id: 'get-backend-url'
+    waitFor: ['deploy-backend']
+
+  # Deploy frontend to Cloud Run
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    entrypoint: 'bash'
+    args:
+      - '-c'
+      - |
+        BACKEND_URL=$(cat /workspace/backend_url.txt)
+        echo "Deploying frontend with BACKEND_URL=$BACKEND_URL"
+        gcloud run deploy eidbi-frontend-service \
+          --image gcr.io/$PROJECT_ID/eidbi-frontend:$COMMIT_SHA \
+          --region us-central1 \
+          --platform managed \
+          --service-account eidbi-service-account@$PROJECT_ID.iam.gserviceaccount.com \
+          --set-env-vars="BACKEND_URL=$BACKEND_URL"
+    id: 'deploy-frontend'
+    waitFor: ['push-frontend', 'get-backend-url']
+
+# Define images to push to Google Container Registry
 images:
   - 'gcr.io/$PROJECT_ID/eidbi-backend:$COMMIT_SHA'
+  - 'gcr.io/$PROJECT_ID/eidbi-frontend:$COMMIT_SHA'
 
 # Optional: Define substitutions
 # substitutions:
