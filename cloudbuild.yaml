@@ -50,9 +50,9 @@ steps:
       - '-c'
       - |
         echo "Getting backend URL..."
-        BACKEND_URL=$(gcloud run services describe eidbi-backend-service --region=us-central1 --format="value(status.url)")
-        echo "Backend URL is $BACKEND_URL"
-        echo "$BACKEND_URL" > /workspace/backend_url.txt
+        API_URL=$(gcloud run services describe eidbi-backend-service --region=us-central1 --format="value(status.url)")
+        echo "Backend URL is $API_URL"
+        echo "$API_URL" > /workspace/api_url.txt
     id: 'get-backend-url'
     waitFor: ['deploy-backend']
 
@@ -62,17 +62,17 @@ steps:
     args:
       - '-c'
       - |
-        # Get the backend URL value
-        BACKEND_URL_VALUE=$(cat /workspace/backend_url.txt)
-        echo "Deploying frontend with BACKEND_URL=$BACKEND_URL_VALUE"
+        # Get the backend API URL value
+        API_URL=$(cat /workspace/api_url.txt)
+        echo "Deploying frontend with API_URL=$API_URL"
         
-        # Create a deployment command without any $ in the arguments that CloudBuild parses
+        # Use a different environment variable name (not BACKEND_URL) to avoid Cloud Build substitution issues
         gcloud run deploy eidbi-frontend-service \
           --image gcr.io/$PROJECT_ID/eidbi-frontend:$COMMIT_SHA \
           --region us-central1 \
           --platform managed \
           --service-account id-eidbi-service-account@lyrical-ward-454915-e6.iam.gserviceaccount.com \
-          --set-env-vars BACKEND_URL="$BACKEND_URL_VALUE"
+          --set-env-vars API_ENDPOINT="$API_URL"
     id: 'deploy-frontend'
     waitFor: ['push-frontend', 'get-backend-url']
 
