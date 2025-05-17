@@ -37,9 +37,9 @@ steps:
       - '--platform'
       - 'managed'
       - '--service-account'
-      - 'eidbi-service-account@$PROJECT_ID.iam.gserviceaccount.com'
+      - 'id-eidbi-service-account@lyrical-ward-454915-e6.iam.gserviceaccount.com'
       - '--set-env-vars'
-      - 'GCP_PROJECT_ID=$PROJECT_ID,GCP_REGION=us-central1,GCP_BUCKET_NAME=eidbi-system-bucket-2024'
+      - 'GCP_PROJECT_ID=$PROJECT_ID,GCP_REGION=us-central1,GCP_BUCKET_NAME=eidbi-system-bucket-lyrical-ward'
     id: 'deploy-backend'
     waitFor: ['push-backend']
 
@@ -68,7 +68,7 @@ steps:
           --image gcr.io/$PROJECT_ID/eidbi-frontend:$COMMIT_SHA \
           --region us-central1 \
           --platform managed \
-          --service-account eidbi-service-account@$PROJECT_ID.iam.gserviceaccount.com \
+          --service-account id-eidbi-service-account@lyrical-ward-454915-e6.iam.gserviceaccount.com \
           --set-env-vars="BACKEND_URL=$BACKEND_URL"
     id: 'deploy-frontend'
     waitFor: ['push-frontend', 'get-backend-url']

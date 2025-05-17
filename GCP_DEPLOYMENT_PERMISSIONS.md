@@ -5,7 +5,7 @@
 When trying to deploy the EIDBI Query System to Google Cloud Run, we are encountering the following permission error:
 
 ```
-ERROR: (gcloud.builds.submit) INVALID_ARGUMENT: could not resolve source: googleapi: Error 403: 25849992695-compute@developer.gserviceaccount.com does not have storage.objects.get access to the Google Cloud Storage object. Permission 'storage.objects.get' denied on resource (or it may not exist).
+ERROR: (gcloud.builds.submit) INVALID_ARGUMENT: could not resolve source: googleapi: Error 403: 171738705900-compute@developer.gserviceaccount.com does not have storage.objects.get access to the Google Cloud Storage object. Permission 'storage.objects.get' denied on resource (or it may not exist).
 ```
 
 This indicates that the compute service account used for Cloud Build and Cloud Run deployments lacks the necessary permissions to access Cloud Storage objects.
@@ -14,31 +14,31 @@ This indicates that the compute service account used for Cloud Build and Cloud R
 
 The following service accounts need specific permissions:
 
-1. **Compute Service Account** (`25849992695-compute@developer.gserviceaccount.com`):
+1. **Compute Service Account** (`171738705900-compute@developer.gserviceaccount.com`):
    - Needs `roles/storage.objectAdmin` or `roles/storage.objectViewer` role for the project's Cloud Storage buckets
    - This is required for Cloud Build to access deployment artifacts
 
-2. **Cloud Build Service Account** (`[PROJECT_NUMBER]@cloudbuild.gserviceaccount.com`):
+2. **Cloud Build Service Account** (`171738705900@cloudbuild.gserviceaccount.com`):
    - Needs `roles/run.admin` to deploy to Cloud Run
    - Needs `roles/iam.serviceAccountUser` to use service accounts
    - Needs `roles/storage.admin` to access storage buckets
 
-3. **EIDBI Service Account** (`eidbi-service-account@[PROJECT_ID].iam.gserviceaccount.com`):
+3. **EIDBI Service Account** (`id-eidbi-service-account@lyrical-ward-454915-e6.iam.gserviceaccount.com`):
    - Already created and properly configured with necessary permissions
 
 ## Required Changes by GCP Administrator
 
 1. Grant Storage Object Admin role to the compute service account:
 ```bash
-gcloud projects add-iam-policy-binding [PROJECT_ID] \
-    --member="serviceAccount:25849992695-compute@developer.gserviceaccount.com" \
+gcloud projects add-iam-policy-binding lyrical-ward-454915-e6 \
+    --member="serviceAccount:171738705900-compute@developer.gserviceaccount.com" \
     --role="roles/storage.objectAdmin"
 ```
 
 2. Grant direct bucket access to the compute service account:
 ```bash
-gcloud storage buckets add-iam-policy-binding gs://[PROJECT_ID]_cloudbuild \
-    --member="serviceAccount:25849992695-compute@developer.gserviceaccount.com" \
+gcloud storage buckets add-iam-policy-binding gs://lyrical-ward-454915-e6_cloudbuild \
+    --member="serviceAccount:171738705900-compute@developer.gserviceaccount.com" \
     --role="roles/storage.objectAdmin"
 ```
 
