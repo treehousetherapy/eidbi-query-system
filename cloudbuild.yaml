@@ -12,17 +12,6 @@ steps:
     id: 'push-backend'
     waitFor: ['build-backend']
 
-  # Build the frontend container image
-  - name: 'gcr.io/cloud-builders/docker'
-    args: ['build', '-t', 'gcr.io/$PROJECT_ID/eidbi-frontend:$COMMIT_SHA', '-f', 'frontend/Dockerfile', 'frontend/']
-    id: 'build-frontend'
-
-  # Push the frontend container image
-  - name: 'gcr.io/cloud-builders/docker'
-    args: ['push', 'gcr.io/$PROJECT_ID/eidbi-frontend:$COMMIT_SHA']
-    id: 'push-frontend'
-    waitFor: ['build-frontend']
-
   # Deploy backend to Cloud Run
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
     entrypoint: gcloud
@@ -43,36 +32,34 @@ steps:
     id: 'deploy-backend'
     waitFor: ['push-backend']
 
-  # Get backend URL and create an env file for the frontend deployment
-  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
-    entrypoint: 'bash'
-    args:
-      - '-c'
-      - |
-        echo "Getting backend URL..."
-        BE_URL=$(gcloud run services describe eidbi-backend-service --region=us-central1 --format="value(status.url)")
-        echo "Backend URL is $BE_URL"
-        # Create a temporary env file for the frontend deployment
-        echo "BACKEND_URL=$BE_URL" > /workspace/frontend.env
-    id: 'create-env-file'
-    waitFor: ['deploy-backend']
+  # Build the frontend container image
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['build', '-t', 'gcr.io/$PROJECT_ID/eidbi-frontend:$COMMIT_SHA', '-f', 'frontend/Dockerfile', 'frontend/']
+    id: 'build-frontend'
 
-  # Deploy frontend to Cloud Run using the env file
+  # Push the frontend container image
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['push', 'gcr.io/$PROJECT_ID/eidbi-frontend:$COMMIT_SHA']
+    id: 'push-frontend'
+    waitFor: ['build-frontend']
+
+  # Deploy frontend to Cloud Run
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
-    entrypoint: 'bash'
+    entrypoint: gcloud
     args:
-      - '-c'
-      - |
-        # Deploy frontend with env-vars-file
-        echo "Deploying frontend with env file..."
-        gcloud run deploy eidbi-frontend-service \
-          --image gcr.io/$PROJECT_ID/eidbi-frontend:$COMMIT_SHA \
-          --region us-central1 \
-          --platform managed \
-          --service-account id-eidbi-service-account@lyrical-ward-454915-e6.iam.gserviceaccount.com \
-          --env-vars-file /workspace/frontend.env
+      - 'run'
+      - 'deploy'
+      - 'eidbi-frontend-service'
+      - '--image'
+      - 'gcr.io/$PROJECT_ID/eidbi-frontend:$COMMIT_SHA'
+      - '--region'
+      - 'us-central1'
+      - '--platform'
+      - 'managed'
+      - '--service-account'
+      - 'id-eidbi-service-account@lyrical-ward-454915-e6.iam.gserviceaccount.com'
     id: 'deploy-frontend'
-    waitFor: ['push-frontend', 'create-env-file']
+    waitFor: ['push-frontend']
 
 # Define images to push to Google Container Registry
 images:
