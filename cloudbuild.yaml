@@ -64,12 +64,13 @@ steps:
       - |
         BACKEND_URL_VALUE=$(cat /workspace/backend_url.txt)
         echo "Deploying frontend with BACKEND_URL_VALUE=$BACKEND_URL_VALUE"
+        # Directly use the BACKEND_URL_VALUE in the gcloud command
         gcloud run deploy eidbi-frontend-service \
           --image gcr.io/$PROJECT_ID/eidbi-frontend:$COMMIT_SHA \
           --region us-central1 \
           --platform managed \
           --service-account id-eidbi-service-account@lyrical-ward-454915-e6.iam.gserviceaccount.com \
-          --set-env-vars="BACKEND_URL=${BACKEND_URL_VALUE}"
+          --set-env-vars="BACKEND_URL=$BACKEND_URL_VALUE"
     id: 'deploy-frontend'
     waitFor: ['push-frontend', 'get-backend-url']
 
