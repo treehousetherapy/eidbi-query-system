@@ -15,7 +15,7 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - [%
 logger = logging.getLogger(__name__)
 
 # --- Application Version ---
-APP_VERSION = "1.1.1"
+APP_VERSION = "1.1.2"
 APP_NAME = "EIDBI Query Assistant"
 
 # --- Configuration ---
