@@ -29,6 +29,7 @@ steps:
       - 'id-eidbi-service-account@lyrical-ward-454915-e6.iam.gserviceaccount.com'
       - '--set-env-vars'
       - 'GCP_PROJECT_ID=$PROJECT_ID,GCP_REGION=us-central1,GCP_BUCKET_NAME=eidbi-system-bucket-lyrical-ward'
+      - '--allow-unauthenticated'
     id: 'deploy-backend'
     waitFor: ['push-backend']
 
@@ -73,6 +74,7 @@ steps:
       - 'id-eidbi-service-account@lyrical-ward-454915-e6.iam.gserviceaccount.com'
       - '--set-env-vars'
       - 'BACKEND_URL=$(cat /workspace/backend_url.txt)'
+      - '--allow-unauthenticated'
     id: 'deploy-frontend'
     waitFor: ['push-frontend', 'get-backend-url']
 
