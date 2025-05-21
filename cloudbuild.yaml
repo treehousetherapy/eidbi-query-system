@@ -12,7 +12,7 @@ steps:
     id: 'push-backend'
     waitFor: ['build-backend']
 
-  # Deploy backend to Cloud Run
+  # Deploy backend to Cloud Run - with debug flag
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
     entrypoint: gcloud
     args:
@@ -30,6 +30,8 @@ steps:
       - '--set-env-vars'
       - 'GCP_PROJECT_ID=$PROJECT_ID,GCP_REGION=us-central1,GCP_BUCKET_NAME=eidbi-system-bucket-lyrical-ward'
       - '--allow-unauthenticated'
+      - '--verbosity=debug'
+      - '--log-http'
     id: 'deploy-backend'
     waitFor: ['push-backend']
 
@@ -75,6 +77,8 @@ steps:
       - '--set-env-vars'
       - 'BACKEND_URL=$(cat /workspace/backend_url.txt)'
       - '--allow-unauthenticated'
+      - '--verbosity=debug'
+      - '--log-http'
     id: 'deploy-frontend'
     waitFor: ['push-frontend', 'get-backend-url']
 
