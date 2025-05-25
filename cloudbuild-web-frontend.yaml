@@ -1,0 +1,60 @@
+# Cloud Build configuration for EIDBI Web Frontend deployment
+
+steps:
+  # Create empty directories that might not exist
+  - name: 'gcr.io/cloud-builders/gcloud'
+    entrypoint: 'bash'
+    args:
+      - '-c'
+      - |
+        mkdir -p web-frontend/css
+        mkdir -p web-frontend/assets
+        echo "Created required directories"
+    id: 'create-dirs'
+
+  # Build the web frontend container image
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['build', '-t', 'us-central1-docker.pkg.dev/$PROJECT_ID/cloud-run-source-deploy/eidbi-web-frontend:latest', '-f', 'web-frontend/Dockerfile', 'web-frontend/']
+    id: 'build-web-frontend'
+    waitFor: ['create-dirs']
+
+  # Push the web frontend container image
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['push', 'us-central1-docker.pkg.dev/$PROJECT_ID/cloud-run-source-deploy/eidbi-web-frontend:latest']
+    id: 'push-web-frontend'
+    waitFor: ['build-web-frontend']
+
+  # Deploy web frontend to Cloud Run
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    entrypoint: bash
+    args:
+      - '-c'
+      - |
+        echo "Deploying web frontend service..."
+        
+        gcloud run deploy eidbi-web-frontend \
+        --image="us-central1-docker.pkg.dev/$PROJECT_ID/cloud-run-source-deploy/eidbi-web-frontend:latest" \
+        --region=us-central1 \
+        --platform=managed \
+        --allow-unauthenticated \
+        --port=80 \
+        --memory=256Mi \
+        --cpu=1
+        
+        if [ $? -eq 0 ]; then
+          echo "Web frontend deployed successfully!"
+          echo "Service URL:"
+          gcloud run services describe eidbi-web-frontend --region=us-central1 --format='value(status.url)'
+        else
+          echo "ERROR: Web frontend deployment failed"
+          exit 1
+        fi
+    id: 'deploy-web-frontend'
+    waitFor: ['push-web-frontend']
+
+# Define images to push to Artifact Registry
+images:
+  - 'us-central1-docker.pkg.dev/$PROJECT_ID/cloud-run-source-deploy/eidbi-web-frontend:latest'
+
+options:
+  logging: CLOUD_LOGGING_ONLY 

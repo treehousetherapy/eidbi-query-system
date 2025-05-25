@@ -1,0 +1,84 @@
+{
+  "name": "eidbi-main-deploy",
+  "description": "CI/CD pipeline for EIDBI Query System",
+  "github": {
+    "owner": "treehousetherapy",
+    "name": "eidbi-query-system",
+    "push": {
+      "branch": "^main$"
+    }
+  },
+  "build": {
+    "steps": [
+      {
+        "name": "gcr.io/cloud-builders/docker",
+        "args": ["build", "-t", "us-central1-docker.pkg.dev/$PROJECT_ID/cloud-run-source-deploy/eidbi-backend:$COMMIT_SHA", "-f", "backend/Dockerfile", "backend/"],
+        "id": "build-backend"
+      },
+      {
+        "name": "gcr.io/cloud-builders/docker",
+        "args": ["push", "us-central1-docker.pkg.dev/$PROJECT_ID/cloud-run-source-deploy/eidbi-backend:$COMMIT_SHA"],
+        "id": "push-backend",
+        "waitFor": ["build-backend"]
+      },
+      {
+        "name": "gcr.io/google.com/cloudsdktool/cloud-sdk",
+        "entrypoint": "bash",
+        "args": [
+          "-c",
+          "echo \"Creating Artifact Registry repository if it doesn't exist...\"; gcloud artifacts repositories describe cloud-run-source-deploy --location=us-central1 || gcloud artifacts repositories create cloud-run-source-deploy --repository-format=docker --location=us-central1 --description=\"Repository for EIDBI Query System\""
+        ],
+        "id": "ensure-artifact-repo",
+        "waitFor": ["push-backend"]
+      },
+      {
+        "name": "gcr.io/google.com/cloudsdktool/cloud-sdk",
+        "entrypoint": "bash",
+        "args": [
+          "-c",
+          "echo \"Deploying backend service...\"; gcloud run deploy eidbi-backend-service --image=us-central1-docker.pkg.dev/$PROJECT_ID/cloud-run-source-deploy/eidbi-backend:$COMMIT_SHA --region=us-central1 --platform=managed --service-account=id-eidbi-service-account@lyrical-ward-454915-e6.iam.gserviceaccount.com --set-env-vars=GCP_PROJECT_ID=$PROJECT_ID,GCP_REGION=us-central1,GCP_BUCKET_NAME=eidbi-system-bucket-lyrical-ward --allow-unauthenticated"
+        ],
+        "id": "deploy-backend",
+        "waitFor": ["ensure-artifact-repo"]
+      },
+      {
+        "name": "gcr.io/google.com/cloudsdktool/cloud-sdk",
+        "entrypoint": "bash",
+        "args": [
+          "-c",
+          "gcloud run services describe eidbi-backend-service --platform managed --region us-central1 --format 'value(status.url)' > /workspace/backend_url.txt; echo \"Backend URL: $(cat /workspace/backend_url.txt)\""
+        ],
+        "id": "get-backend-url",
+        "waitFor": ["deploy-backend"]
+      },
+      {
+        "name": "gcr.io/cloud-builders/docker",
+        "args": ["build", "-t", "us-central1-docker.pkg.dev/$PROJECT_ID/cloud-run-source-deploy/eidbi-frontend:$COMMIT_SHA", "-f", "frontend/Dockerfile", "frontend/"],
+        "id": "build-frontend"
+      },
+      {
+        "name": "gcr.io/cloud-builders/docker",
+        "args": ["push", "us-central1-docker.pkg.dev/$PROJECT_ID/cloud-run-source-deploy/eidbi-frontend:$COMMIT_SHA"],
+        "id": "push-frontend",
+        "waitFor": ["build-frontend"]
+      },
+      {
+        "name": "gcr.io/google.com/cloudsdktool/cloud-sdk",
+        "entrypoint": "bash",
+        "args": [
+          "-c",
+          "echo \"Deploying frontend service...\"; BACKEND_URL=$(cat /workspace/backend_url.txt); echo \"Using backend URL: $BACKEND_URL\"; gcloud run deploy eidbi-frontend-service --image=us-central1-docker.pkg.dev/$PROJECT_ID/cloud-run-source-deploy/eidbi-frontend:$COMMIT_SHA --region=us-central1 --platform=managed --service-account=id-eidbi-service-account@lyrical-ward-454915-e6.iam.gserviceaccount.com --set-env-vars=BACKEND_URL=$BACKEND_URL --allow-unauthenticated"
+        ],
+        "id": "deploy-frontend",
+        "waitFor": ["push-frontend", "get-backend-url"]
+      }
+    ],
+    "images": [
+      "us-central1-docker.pkg.dev/$PROJECT_ID/cloud-run-source-deploy/eidbi-backend:$COMMIT_SHA",
+      "us-central1-docker.pkg.dev/$PROJECT_ID/cloud-run-source-deploy/eidbi-frontend:$COMMIT_SHA"
+    ],
+    "options": {
+      "logging": "CLOUD_LOGGING_ONLY"
+    }
+  }
+} 

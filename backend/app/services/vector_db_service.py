@@ -5,15 +5,37 @@ import os
 import json
 import numpy as np
 from typing import List, Dict, Any, Tuple, Optional
+import re
 
 # Configure logging
 logger = logging.getLogger(__name__)
 
-# Path to the scraped data file (using absolute path)
-# Make path absolute and independent of current working directory
-BACKEND_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-PROJECT_ROOT = os.path.dirname(BACKEND_DIR)
-SCRAPED_DATA_PATH = os.path.join(PROJECT_ROOT, 'scraper', 'local_scraped_data_with_embeddings_20250511_154715.jsonl')
+# Path to the scraped data file
+# When running in Docker, the file will be in /app directory
+# When running locally, try multiple paths
+def get_scraped_data_path():
+    """Get the path to the scraped data file, checking multiple locations."""
+    possible_paths = [
+        # Docker container path - new file with better content
+        '/app/local_scraped_data_with_embeddings.jsonl',
+        # Local development - in backend directory
+        os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '..', 'local_scraped_data_with_embeddings.jsonl'),
+        # Fallback to the specific file if the generic one doesn't exist
+        '/app/local_scraped_data_with_embeddings_20250511_152056.jsonl',
+        os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '..', 'local_scraped_data_with_embeddings_20250511_152056.jsonl'),
+        # Local development - project root
+        os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))), 'scraper', 'local_scraped_data_with_embeddings_20250511_152056.jsonl')
+    ]
+    
+    for path in possible_paths:
+        if os.path.exists(path):
+            logger.info(f"Found scraped data at: {path}")
+            return path
+    
+    logger.error(f"Could not find scraped data file. Tried paths: {possible_paths}")
+    return possible_paths[0]  # Default to Docker path
+
+SCRAPED_DATA_PATH = get_scraped_data_path()
 
 def cosine_similarity(a: List[float], b: List[float]) -> float:
     """Calculate the cosine similarity between two vectors."""
@@ -82,6 +104,123 @@ def find_neighbors(query_embedding: List[float], num_neighbors_override: Optiona
     results.sort(key=lambda x: x[1], reverse=True)
     return results[:num_neighbors]
 
+def keyword_search(keywords: List[str], num_results: int = 10) -> List[Tuple[str, int]]:
+    """
+    Search for chunks containing specific keywords
+    
+    Args:
+        keywords: List of keywords to search for
+        num_results: Maximum number of results to return
+        
+    Returns:
+        List of (chunk_id, match_count) tuples sorted by match count
+    """
+    global _cached_data
+    
+    # Load data if not already cached
+    if _cached_data is None:
+        _cached_data = _load_data()
+    
+    if not _cached_data:
+        logger.warning("No data loaded for keyword search.")
+        return []
+    
+    logger.info(f"Performing keyword search for: {keywords}")
+    
+    keyword_results = []
+    
+    for chunk in _cached_data:
+        if 'id' not in chunk or 'content' not in chunk:
+            continue
+        
+        content_lower = chunk['content'].lower()
+        title_lower = chunk.get('title', '').lower()
+        
+        # Count keyword matches
+        match_count = 0
+        matched_keywords = set()
+        
+        for keyword in keywords:
+            keyword_lower = keyword.lower()
+            
+            # Count occurrences in content
+            content_matches = len(re.findall(rf'\b{re.escape(keyword_lower)}\b', content_lower))
+            
+            # Bonus for title matches
+            title_matches = len(re.findall(rf'\b{re.escape(keyword_lower)}\b', title_lower))
+            title_matches *= 3  # Title matches are worth more
+            
+            if content_matches > 0 or title_matches > 0:
+                matched_keywords.add(keyword)
+                match_count += content_matches + title_matches
+        
+        # Only include chunks that match at least one keyword
+        if match_count > 0:
+            keyword_results.append((chunk['id'], match_count, len(matched_keywords)))
+    
+    # Sort by match count (descending), then by number of different keywords matched
+    keyword_results.sort(key=lambda x: (x[1], x[2]), reverse=True)
+    
+    # Return only chunk_id and match_count
+    results = [(chunk_id, match_count) for chunk_id, match_count, _ in keyword_results[:num_results]]
+    
+    logger.info(f"Keyword search found {len(results)} matching chunks")
+    return results
+
+def hybrid_search(
+    query_embedding: List[float], 
+    keywords: List[str],
+    num_results: int = 10,
+    vector_weight: float = 0.7
+) -> List[Tuple[str, float]]:
+    """
+    Perform hybrid search combining vector similarity and keyword matching
+    
+    Args:
+        query_embedding: The embedding vector for semantic search
+        keywords: Keywords for keyword matching
+        num_results: Number of results to return
+        vector_weight: Weight for vector search (0-1), keyword gets 1-vector_weight
+        
+    Returns:
+        List of (chunk_id, combined_score) tuples
+    """
+    logger.info(f"Performing hybrid search with vector_weight={vector_weight}")
+    
+    # Get vector search results
+    vector_results = find_neighbors(query_embedding, num_results * 2)  # Get more for better coverage
+    
+    # Get keyword search results
+    keyword_results = keyword_search(keywords, num_results * 2)
+    
+    # Combine scores
+    combined_scores = {}
+    
+    # Add vector scores (normalized)
+    if vector_results:
+        max_vector_score = max(score for _, score in vector_results)
+        for chunk_id, score in vector_results:
+            normalized_score = score / max_vector_score if max_vector_score > 0 else 0
+            combined_scores[chunk_id] = vector_weight * normalized_score
+    
+    # Add keyword scores (normalized)
+    if keyword_results:
+        max_keyword_score = max(count for _, count in keyword_results)
+        for chunk_id, count in keyword_results:
+            normalized_score = count / max_keyword_score if max_keyword_score > 0 else 0
+            keyword_contribution = (1 - vector_weight) * normalized_score
+            
+            if chunk_id in combined_scores:
+                combined_scores[chunk_id] += keyword_contribution
+            else:
+                combined_scores[chunk_id] = keyword_contribution
+    
+    # Sort by combined score
+    results = [(chunk_id, score) for chunk_id, score in combined_scores.items()]
+    results.sort(key=lambda x: x[1], reverse=True)
+    
+    return results[:num_results]
+
 def get_chunk_by_id(chunk_id: str) -> Optional[Dict[str, Any]]:
     """
     Retrieve a specific chunk by its ID from the local JSONL file.
@@ -109,6 +248,23 @@ def get_chunk_by_id(chunk_id: str) -> Optional[Dict[str, Any]]:
             
     logger.warning(f"Chunk with ID {chunk_id} not found in local data.")
     return None
+
+def get_chunks_by_ids(chunk_ids: List[str]) -> List[Dict[str, Any]]:
+    """
+    Retrieve multiple chunks by their IDs
+    
+    Args:
+        chunk_ids: List of chunk IDs to retrieve
+        
+    Returns:
+        List of chunk dictionaries
+    """
+    chunks = []
+    for chunk_id in chunk_ids:
+        chunk = get_chunk_by_id(chunk_id)
+        if chunk:
+            chunks.append(chunk)
+    return chunks
 
 # --- Example Usage --- (Requires a Deployed Index Endpoint)
 if __name__ == '__main__':

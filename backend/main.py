@@ -18,26 +18,26 @@ from functools import lru_cache
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - [%(name)s] %(message)s')
 logger = logging.getLogger(__name__) # Initialize logger early
 
-# --- Adjust Python Path & Import Services ---
-# Correctly calculate the project root and add it (if necessary)
+# --- Import Services ---
 try:
-    MAIN_PY_PATH = os.path.abspath(__file__)
-    BACKEND_DIR = os.path.dirname(MAIN_PY_PATH)
-    PROJECT_ROOT = os.path.dirname(BACKEND_DIR)
-
-    # Add project root to sys.path if not already present (often needed for imports like 'config')
-    if PROJECT_ROOT not in sys.path:
-        sys.path.insert(0, PROJECT_ROOT)
-
-    # Use imports relative to the project root
-    from backend.app.services.embedding_service import initialize_vertex_ai, generate_embeddings
-    from backend.app.services.vector_db_service import find_neighbors, get_chunk_by_id
-    from backend.app.services.llm_service import generate_text_response
-    from scraper.utils.gcs_utils import read_json_from_gcs # Import from scraper.utils
-    from config.settings import settings # Import from config
+    # Import services (using relative imports since we're in backend directory)
+    from app.services.embedding_service import initialize_vertex_ai, generate_embeddings
+    from app.services.vector_db_service import find_neighbors, get_chunk_by_id, hybrid_search, get_chunks_by_ids
+    from app.services.llm_service import generate_text_response
+    from app.services.query_enhancer import query_enhancer
+    from app.services.reranker import reranker
+    
+    # Import new enhanced services
+    from app.services.feedback_service import feedback_service, FeedbackType, FeedbackCategory
+    from app.services.prompt_engineering import prompt_service, QueryType, ResponseFormat
+    from app.services.data_source_integration import data_integration_service
+    
+    # Import utilities and config (now local to backend)
+    from utils.gcs_utils import read_json_from_gcs
+    from config.settings import settings
 
 except ImportError as e:
-    logger.error(f"Failed to import services or utils: {e}", exc_info=True) # Logger is now defined
+    logger.error(f"Failed to import services or utils: {e}", exc_info=True)
     # Define dummy functions if import fails, to allow basic app run
     def initialize_vertex_ai(): return False
     def generate_embeddings(texts: List[str]) -> Optional[List[Optional[List[float]]]]: return None
@@ -45,10 +45,17 @@ except ImportError as e:
     def generate_text_response(prompt: str) -> Optional[str]: return "LLM Service unavailable."
     def read_json_from_gcs(bucket: str, blob: str) -> Optional[Dict]: return None
     def get_chunk_by_id(chunk_id: str) -> Optional[Dict[str, Any]]: return None
+    def hybrid_search(query_embedding, keywords, num_results=10): return []
+    def get_chunks_by_ids(chunk_ids): return []
     settings = None # Fallback
+    query_enhancer = None
+    reranker = None
+    feedback_service = None
+    prompt_service = None
+    data_integration_service = None
 
 # --- System Version ---
-APP_VERSION = "1.1.0"
+APP_VERSION = "2.0.0"  # Updated version for enhanced features
 
 # --- Cache Configuration ---
 # Get cache settings from environment variables or use defaults
@@ -152,6 +159,16 @@ async def lifespan(app: FastAPI):
         logger.error("FATAL: Vertex AI Initialization failed on startup. Embedding endpoint will not work.")
         # Depending on requirements, you might want to exit here or let it run degraded
     
+    # Initialize data source integration service
+    if data_integration_service:
+        logger.info("Initializing data source integration service...")
+        try:
+            # Perform initial data source update in background
+            import asyncio
+            asyncio.create_task(data_integration_service.update_all_sources())
+        except Exception as e:
+            logger.warning(f"Failed to initialize data source updates: {e}")
+    
     yield
     
     # Shutdown: Cleanup (if any needed)
@@ -159,8 +176,8 @@ async def lifespan(app: FastAPI):
 
 # --- FastAPI App Instance ---
 app = FastAPI(
-    title="EIDBI Backend API",
-    description="API for processing and querying EIDBI data.",
+    title="Enhanced EIDBI Backend API",
+    description="API for processing and querying EIDBI data with enhanced search capabilities, feedback loops, and multi-source integration.",
     version=APP_VERSION,
     lifespan=lifespan # Register startup/shutdown events
 )
@@ -200,10 +217,15 @@ async def generic_exception_handler(request: Request, exc: Exception):
         content={"detail": "An unexpected error occurred. Please try again later."},
     )
 
-# --- API Models ---
+# --- Enhanced API Models ---
 class QueryRequest(BaseModel):
     query_text: str
     num_results: int = 5 # Default to 5 neighbors
+    use_hybrid_search: bool = True  # Enable hybrid search by default
+    use_reranking: bool = True  # Enable reranking by default
+    use_enhanced_prompts: bool = True  # Enable enhanced prompt engineering
+    use_additional_sources: bool = True  # Enable additional data sources
+    user_session_id: Optional[str] = None  # For tracking user sessions
 
 class NeighborResult(BaseModel):
     chunk_id: str
@@ -215,6 +237,22 @@ class QueryResponse(BaseModel):
     retrieved_chunk_ids: List[str]
     version: str = APP_VERSION
     cached: bool = False
+    search_method: str = "hybrid"  # "vector", "hybrid", or "keyword"
+    query_type: Optional[str] = None  # Detected query type
+    response_format: Optional[str] = None  # Used response format
+    sources_used: Optional[List[str]] = None  # Data sources used
+    prompt_metadata: Optional[Dict[str, Any]] = None  # Prompt engineering metadata
+
+class FeedbackRequest(BaseModel):
+    query_text: str
+    response_text: str
+    feedback_type: str  # "thumbs_up", "thumbs_down", "rating", "detailed"
+    rating: Optional[int] = None  # 1-5 scale
+    categories: Optional[List[str]] = None  # List of feedback categories
+    detailed_feedback: Optional[str] = None
+    retrieved_chunk_ids: Optional[List[str]] = None
+    search_method: Optional[str] = None
+    user_session_id: Optional[str] = None
 
 class CacheStatsResponse(BaseModel):
     embedding_cache_enabled: bool
@@ -225,10 +263,17 @@ class CacheStatsResponse(BaseModel):
     query_cache_max_size: int
 
 # --- Helper Function ---
-def construct_llm_prompt(query: str, context_chunks: List[Dict[str, Any]]) -> str:
+def construct_llm_prompt(query: str, context_chunks: List[Dict[str, Any]], use_enhanced_prompts: bool = True) -> tuple[str, Dict[str, Any]]:
     """Constructs a prompt for the LLM using retrieved context."""
-    context = "\n\n---\n\n".join([chunk.get('content', '') for chunk in context_chunks])
-    prompt = f"""You are an expert assistant knowledgeable about the Minnesota EIDBI program.
+    if use_enhanced_prompts and prompt_service:
+        # Use enhanced prompt engineering
+        prompt = prompt_service.construct_enhanced_prompt(query, context_chunks)
+        metadata = prompt_service.get_prompt_metadata(query)
+        return prompt, metadata
+    else:
+        # Use basic prompt
+        context = "\n\n---\n\n".join([chunk.get('content', '') for chunk in context_chunks])
+        prompt = f"""You are an expert assistant knowledgeable about the Minnesota EIDBI program.
 Answer the following question based *only* on the provided context. If the context does not contain the answer, say 'I cannot answer the question based on the provided information.'
 
 Question: {query}
@@ -237,15 +282,26 @@ Context:
 {context}
 
 Answer:"""
-    return prompt
+        metadata = {"query_type": "general", "response_format": "basic", "template_used": "basic"}
+        return prompt, metadata
 
 # --- API Endpoints ---
 @app.get("/")
 async def read_root():
     return {
-        "message": "Welcome to the EIDBI Backend API",
+        "message": "Welcome to the Enhanced EIDBI Backend API",
         "version": APP_VERSION,
-        "status": "healthy"
+        "status": "healthy",
+        "features": [
+            "query_expansion", 
+            "hybrid_search", 
+            "reranking", 
+            "enhanced_caching",
+            "feedback_loops",
+            "enhanced_prompt_engineering",
+            "multi_source_integration",
+            "automated_testing"
+        ]
     }
 
 @app.get("/health")
@@ -254,7 +310,12 @@ async def health_check():
     return {
         "status": "healthy",
         "version": APP_VERSION,
-        "timestamp": time.time()
+        "timestamp": time.time(),
+        "services": {
+            "feedback_service": feedback_service is not None,
+            "prompt_service": prompt_service is not None,
+            "data_integration_service": data_integration_service is not None
+        }
     }
 
 @app.get("/cache-stats")
@@ -282,6 +343,357 @@ async def clear_cache():
         "timestamp": time.time()
     }
 
+# --- Feedback Endpoints ---
+@app.post("/feedback")
+async def submit_feedback(feedback: FeedbackRequest):
+    """Submit user feedback for query responses."""
+    if not feedback_service:
+        raise HTTPException(status_code=503, detail="Feedback service not available")
+    
+    try:
+        # Convert string enums to enum objects
+        feedback_type = FeedbackType(feedback.feedback_type)
+        categories = [FeedbackCategory(cat) for cat in feedback.categories] if feedback.categories else None
+        
+        feedback_id = feedback_service.submit_feedback(
+            query_text=feedback.query_text,
+            response_text=feedback.response_text,
+            feedback_type=feedback_type,
+            rating=feedback.rating,
+            categories=categories,
+            detailed_feedback=feedback.detailed_feedback,
+            retrieved_chunk_ids=feedback.retrieved_chunk_ids,
+            search_method=feedback.search_method,
+            user_session_id=feedback.user_session_id
+        )
+        
+        return {
+            "feedback_id": feedback_id,
+            "message": "Feedback submitted successfully",
+            "timestamp": time.time()
+        }
+        
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    except Exception as e:
+        logger.error(f"Error submitting feedback: {e}")
+        raise HTTPException(status_code=500, detail="Failed to submit feedback")
+
+@app.get("/feedback/stats")
+async def get_feedback_stats(days: int = 30):
+    """Get feedback statistics."""
+    if not feedback_service:
+        raise HTTPException(status_code=503, detail="Feedback service not available")
+    
+    try:
+        stats = feedback_service.get_feedback_stats(days=days)
+        return stats
+    except Exception as e:
+        logger.error(f"Error getting feedback stats: {e}")
+        raise HTTPException(status_code=500, detail="Failed to get feedback statistics")
+
+@app.get("/feedback/problematic-queries")
+async def get_problematic_queries(min_feedback_count: int = 2):
+    """Get queries that consistently receive poor feedback."""
+    if not feedback_service:
+        raise HTTPException(status_code=503, detail="Feedback service not available")
+    
+    try:
+        problematic = feedback_service.get_problematic_queries(min_feedback_count=min_feedback_count)
+        return {
+            "problematic_queries": problematic,
+            "count": len(problematic)
+        }
+    except Exception as e:
+        logger.error(f"Error getting problematic queries: {e}")
+        raise HTTPException(status_code=500, detail="Failed to get problematic queries")
+
+@app.get("/feedback/improvement-suggestions")
+async def get_improvement_suggestions():
+    """Get improvement suggestions based on feedback patterns."""
+    if not feedback_service:
+        raise HTTPException(status_code=503, detail="Feedback service not available")
+    
+    try:
+        suggestions = feedback_service.get_improvement_suggestions()
+        return {
+            "suggestions": suggestions,
+            "count": len(suggestions)
+        }
+    except Exception as e:
+        logger.error(f"Error getting improvement suggestions: {e}")
+        raise HTTPException(status_code=500, detail="Failed to get improvement suggestions")
+
+# --- Data Source Integration Endpoints ---
+@app.get("/data-sources/status")
+async def get_data_sources_status():
+    """Get status of all data sources."""
+    if not data_integration_service:
+        raise HTTPException(status_code=503, detail="Data integration service not available")
+    
+    try:
+        status = data_integration_service.get_source_status()
+        return status
+    except Exception as e:
+        logger.error(f"Error getting data source status: {e}")
+        raise HTTPException(status_code=500, detail="Failed to get data source status")
+
+@app.post("/data-sources/update")
+async def update_data_sources(force_update: bool = False):
+    """Update content from all data sources."""
+    if not data_integration_service:
+        raise HTTPException(status_code=503, detail="Data integration service not available")
+    
+    try:
+        result = await data_integration_service.update_all_sources(force_update=force_update)
+        return result
+    except Exception as e:
+        logger.error(f"Error updating data sources: {e}")
+        raise HTTPException(status_code=500, detail="Failed to update data sources")
+
+# --- Enhanced Query Endpoint ---
+@app.post("/query", response_model=QueryResponse)
+async def perform_query(request: QueryRequest):
+    """
+    Enhanced query endpoint with query expansion, hybrid search, reranking,
+    enhanced prompt engineering, feedback integration, and multi-source data.
+    """
+    logger.info(f"Received enhanced query: '{request.query_text}', num_results: {request.num_results}")
+    logger.info(f"Options: hybrid_search={request.use_hybrid_search}, reranking={request.use_reranking}, enhanced_prompts={request.use_enhanced_prompts}, additional_sources={request.use_additional_sources}")
+    
+    query_start_time = time.time()
+    
+    # Check cache first 
+    cached_result = query_cache.get(request.query_text, request.num_results, False)
+    if cached_result:
+        return QueryResponse(**cached_result)
+
+    # 1. Query Enhancement - Expand the query
+    if query_enhancer:
+        expanded_queries = query_enhancer.expand_query(request.query_text)
+        keywords = query_enhancer.extract_keywords(request.query_text)
+        logger.info(f"Expanded to {len(expanded_queries)} queries, extracted {len(keywords)} keywords")
+    else:
+        expanded_queries = [request.query_text]
+        keywords = request.query_text.lower().split()
+
+    # 2. Generate embeddings for expanded queries
+    all_embeddings = []
+    for query in expanded_queries[:3]:  # Limit to first 3 expansions for efficiency
+        if ENABLE_EMBEDDING_CACHE:
+            query_embedding = cached_generate_embeddings(query)
+        else:
+            query_embedding_list = generate_embeddings([query])
+            query_embedding = query_embedding_list[0] if query_embedding_list and query_embedding_list[0] is not None else None
+        
+        if query_embedding:
+            all_embeddings.append(query_embedding)
+
+    if not all_embeddings:
+        logger.error(f"Failed to generate any embeddings for query: '{request.query_text}'")
+        raise HTTPException(status_code=500, detail="Failed to generate query embedding.")
+
+    # Use the first embedding as primary (original query)
+    primary_embedding = all_embeddings[0]
+
+    # 3. Perform search (hybrid or vector-only)
+    search_results = []
+    sources_used = []
+    
+    # Primary search in vector database
+    if request.use_hybrid_search:
+        # Hybrid search combining vector and keyword
+        primary_results = hybrid_search(
+            query_embedding=primary_embedding,
+            keywords=keywords,
+            num_results=request.num_results * 2  # Get more for reranking
+        )
+        search_method = "hybrid"
+    else:
+        # Traditional vector-only search
+        primary_results = find_neighbors(
+            query_embedding=primary_embedding,
+            num_neighbors_override=request.num_results * 2
+        )
+        search_method = "vector"
+    
+    search_results.extend(primary_results)
+    sources_used.append("primary_vector_db")
+    
+    # Additional sources search
+    if request.use_additional_sources and data_integration_service:
+        try:
+            additional_content = data_integration_service.get_content_for_query(
+                request.query_text, 
+                max_sources=2
+            )
+            
+            if additional_content:
+                logger.info(f"Found {len(additional_content)} additional content items")
+                # Convert additional content to search result format
+                for item in additional_content:
+                    # Create a pseudo chunk ID for additional content
+                    chunk_id = f"additional_{hashlib.md5(item['url'].encode()).hexdigest()[:8]}"
+                    search_results.append((chunk_id, 0.8))  # Give it a good similarity score
+                    sources_used.append(item.get('source_name', 'additional_source'))
+        except Exception as e:
+            logger.warning(f"Failed to get additional sources: {e}")
+
+    if not search_results:
+        logger.warning(f"No results found for query: '{request.query_text}'")
+        
+        # Fall back to simple answer
+        logger.info("Falling back to simple answer mode")
+        
+        if request.use_enhanced_prompts and prompt_service:
+            prompt, prompt_metadata = construct_llm_prompt(request.query_text, [], request.use_enhanced_prompts)
+        else:
+            prompt = f"""You are an expert assistant knowledgeable about the Minnesota EIDBI program.
+Answer the following question as best you can with general knowledge.
+
+Question: {request.query_text}
+
+Answer:"""
+            prompt_metadata = {"query_type": "general", "response_format": "basic"}
+        
+        fallback_answer = generate_text_response(prompt)
+        if not fallback_answer:
+            fallback_answer = "Could not find relevant information about this topic in the EIDBI documentation."
+            
+        result = {
+            "query": request.query_text,
+            "answer": fallback_answer + "\n\n(Note: This response is based on general knowledge as no matching content was found in the database.)",
+            "retrieved_chunk_ids": [],
+            "version": APP_VERSION,
+            "cached": False,
+            "search_method": search_method,
+            "query_type": prompt_metadata.get("query_type"),
+            "response_format": prompt_metadata.get("response_format"),
+            "sources_used": sources_used,
+            "prompt_metadata": prompt_metadata
+        }
+        
+        # Cache the result
+        query_cache.set(request.query_text, request.num_results, False, result)
+        
+        return QueryResponse(**result)
+
+    # 4. Get chunk IDs and retrieve content
+    chunk_ids = [result[0] for result in search_results]
+    similarity_scores = [result[1] for result in search_results]
+    
+    # Retrieve chunk content
+    chunks = get_chunks_by_ids(chunk_ids)
+    
+    # Add additional source content if available
+    if request.use_additional_sources and data_integration_service:
+        try:
+            additional_content = data_integration_service.get_content_for_query(
+                request.query_text, 
+                max_sources=2
+            )
+            
+            for item in additional_content:
+                chunk_id = f"additional_{hashlib.md5(item['url'].encode()).hexdigest()[:8]}"
+                if chunk_id in chunk_ids:
+                    # Add the additional content as a chunk
+                    chunks.append({
+                        'id': chunk_id,
+                        'content': item['content'],
+                        'url': item['url'],
+                        'title': item.get('title', ''),
+                        'source_type': 'additional'
+                    })
+        except Exception as e:
+            logger.warning(f"Failed to add additional content: {e}")
+    
+    if not chunks:
+        logger.error(f"Failed to retrieve content for any chunk IDs: {chunk_ids}")
+        # Fall back to simple answer with enhanced prompts
+        if request.use_enhanced_prompts and prompt_service:
+            prompt, prompt_metadata = construct_llm_prompt(request.query_text, [], request.use_enhanced_prompts)
+        else:
+            prompt = f"""You are an expert assistant knowledgeable about the Minnesota EIDBI program.
+Answer the following question as best you can with general knowledge.
+
+Question: {request.query_text}
+
+Answer:"""
+            prompt_metadata = {"query_type": "general", "response_format": "basic"}
+        
+        fallback_answer = generate_text_response(prompt)
+        if not fallback_answer:
+            fallback_answer = "I apologize, but I could not retrieve the relevant content to answer your question accurately."
+            
+        result = {
+            "query": request.query_text,
+            "answer": fallback_answer + "\n\n(Note: This response is based on general knowledge as there was an error retrieving specific content.)",
+            "retrieved_chunk_ids": [],
+            "cached": False,
+            "version": APP_VERSION,
+            "search_method": search_method,
+            "query_type": prompt_metadata.get("query_type"),
+            "response_format": prompt_metadata.get("response_format"),
+            "sources_used": sources_used,
+            "prompt_metadata": prompt_metadata
+        }
+        
+        # Cache the result
+        query_cache.set(request.query_text, request.num_results, False, result)
+        
+        return QueryResponse(**result)
+
+    # 5. Rerank results if enabled
+    if request.use_reranking and reranker:
+        reranked_results = reranker.rerank_results(
+            query=request.query_text,
+            chunks=chunks,
+            keywords=keywords,
+            similarity_scores=similarity_scores
+        )
+        
+        # Take top results after reranking
+        final_chunks = [result[0] for result in reranked_results[:request.num_results]]
+        final_chunk_ids = [chunk['id'] for chunk in final_chunks]
+        logger.info(f"Reranked results. Top chunk IDs: {final_chunk_ids}")
+    else:
+        # Use original order
+        final_chunks = chunks[:request.num_results]
+        final_chunk_ids = [chunk['id'] for chunk in final_chunks]
+
+    # 6. Construct Enhanced Prompt and Query LLM
+    prompt, prompt_metadata = construct_llm_prompt(request.query_text, final_chunks, request.use_enhanced_prompts)
+    logger.debug(f"Generated LLM Prompt with {len(final_chunks)} chunks using {prompt_metadata.get('template_used', 'basic')} template")
+
+    llm_answer = generate_text_response(prompt)
+
+    if llm_answer is None:
+        logger.error("LLM failed to generate a response.")
+        raise HTTPException(status_code=500, detail="AI failed to generate an answer.")
+
+    # 7. Format and Return Response
+    query_duration_ms = int((time.time() - query_start_time) * 1000)
+    logger.info(f"Successfully generated LLM answer in {query_duration_ms}ms using {search_method} search with {len(sources_used)} sources")
+    
+    result = {
+        "query": request.query_text,
+        "answer": llm_answer.strip(),
+        "retrieved_chunk_ids": final_chunk_ids,
+        "cached": False,
+        "version": APP_VERSION,
+        "search_method": search_method,
+        "query_type": prompt_metadata.get("query_type"),
+        "response_format": prompt_metadata.get("response_format"),
+        "sources_used": list(set(sources_used)),  # Remove duplicates
+        "prompt_metadata": prompt_metadata
+    }
+    
+    # Cache the result
+    query_cache.set(request.query_text, request.num_results, False, result)
+    
+    return QueryResponse(**result)
+
+# Keep existing endpoints for backward compatibility
 @app.post("/simple-answer")
 async def simple_answer(query_text: str = Body(..., embed=True, description="Question to answer")):
     """
@@ -297,12 +709,17 @@ async def simple_answer(query_text: str = Body(..., embed=True, description="Que
         return cached_result
     
     try:
-        prompt = f"""You are an expert assistant knowledgeable about the Minnesota EIDBI program.
+        # Use enhanced prompts if available
+        if prompt_service:
+            prompt, prompt_metadata = construct_llm_prompt(query_text, [], True)
+        else:
+            prompt = f"""You are an expert assistant knowledgeable about the Minnesota EIDBI program.
 Answer the following question as best you can with general knowledge.
 
 Question: {query_text}
 
 Answer:"""
+            prompt_metadata = {"query_type": "general", "response_format": "basic"}
         
         answer = generate_text_response(prompt)
         
@@ -318,7 +735,10 @@ Answer:"""
             "note": "This response is based on general model knowledge, not specific document retrieval.",
             "version": APP_VERSION,
             "cached": False,
-            "retrieved_chunk_ids": []  # Empty for simple answers
+            "retrieved_chunk_ids": [],  # Empty for simple answers
+            "query_type": prompt_metadata.get("query_type"),
+            "response_format": prompt_metadata.get("response_format"),
+            "prompt_metadata": prompt_metadata
         }
         
         # Cache the result
@@ -371,164 +791,10 @@ async def get_embeddings(texts: List[str] = Body(..., embed=True, description="L
     logger.info(f"Successfully processed embedding request. Returning {len(embeddings)} results.")
     return embeddings
 
-@app.post("/query", response_model=QueryResponse)
-async def perform_query(request: QueryRequest):
-    """
-    Receives text query, generates embedding, finds neighbors, retrieves chunk text,
-    prompts LLM, and returns the synthesized answer.
-    """
-    logger.info(f"Received query: '{request.query_text}', num_results: {request.num_results}")
-    
-    query_start_time = time.time()
-    
-    # Check cache first 
-    cached_result = query_cache.get(request.query_text, request.num_results, False)
-    if cached_result:
-        return QueryResponse(**cached_result)
-
-    # 1. Generate embedding for the query
-    query_embedding = None
-    if ENABLE_EMBEDDING_CACHE:
-        query_embedding = cached_generate_embeddings(request.query_text)
-    else:
-        query_embedding_list = generate_embeddings([request.query_text])
-        query_embedding = query_embedding_list[0] if query_embedding_list and query_embedding_list[0] is not None else None
-
-    if query_embedding is None:
-        logger.error(f"Failed to generate embedding for query: '{request.query_text}'")
-        raise HTTPException(status_code=500, detail="Failed to generate query embedding.")
-
-    # 2. Find nearest neighbor chunk IDs in Vector DB
-    neighbors = find_neighbors(
-        query_embedding=query_embedding,
-        num_neighbors_override=request.num_results
-    )
-    if neighbors is None or not neighbors:
-        logger.warning(f"No neighbors found for query: '{request.query_text}'")
-        
-        # If no relevant chunks found, fall back to simple answer
-        logger.info("Falling back to simple answer mode")
-        
-        prompt = f"""You are an expert assistant knowledgeable about the Minnesota EIDBI program.
-Answer the following question as best you can with general knowledge.
-
-Question: {request.query_text}
-
-Answer:"""
-        
-        fallback_answer = generate_text_response(prompt)
-        if not fallback_answer:
-            fallback_answer = "Could not find relevant information about this topic in the EIDBI documentation."
-            
-        result = {
-            "query": request.query_text,
-            "answer": fallback_answer + "\n\n(Note: This response is based on general knowledge as no matching content was found in the database.)",
-            "retrieved_chunk_ids": [],
-            "version": APP_VERSION,
-            "cached": False
-        }
-        
-        # Cache the result
-        query_cache.set(request.query_text, request.num_results, False, result)
-        
-        return QueryResponse(**result)
-
-    neighbor_ids = [nid for nid, dist in neighbors]
-    logger.info(f"Found neighbor chunk IDs: {neighbor_ids}")
-
-    # 3. Retrieve content for neighbor chunks
-    retrieved_chunks_content: List[Dict[str, Any]] = []
-    
-    # First try to get the chunks from local file
-    logger.info("Retrieving chunks from local file...")
-    for chunk_id in neighbor_ids:
-        chunk = get_chunk_by_id(chunk_id)
-        if chunk:
-            retrieved_chunks_content.append(chunk)
-            logger.debug(f"Retrieved chunk {chunk_id} from local file")
-        else:
-            logger.warning(f"Could not find chunk {chunk_id} in local file")
-    
-    # If local retrieval was successful, skip GCS
-    if retrieved_chunks_content:
-        logger.info(f"Successfully retrieved {len(retrieved_chunks_content)} chunks from local file")
-    else:
-        # Try GCS as fallback
-        gcs_bucket_name = settings.gcp.bucket_name if settings else None
-        if gcs_bucket_name:
-            logger.info(f"Trying to retrieve chunks from GCS bucket: {gcs_bucket_name}")
-            try:
-                for chunk_id in neighbor_ids:
-                    blob_name = f"chunks/{chunk_id}.json"
-                    chunk_data = read_json_from_gcs(gcs_bucket_name, blob_name)
-                    if chunk_data:
-                        retrieved_chunks_content.append(chunk_data)
-                    else:
-                        logger.warning(f"Could not retrieve content for chunk ID: {chunk_id} from GCS.")
-                
-                if retrieved_chunks_content:
-                    logger.info(f"Successfully retrieved {len(retrieved_chunks_content)} chunks from GCS")
-            except Exception as e:
-                logger.error(f"Error retrieving chunks from GCS: {e}")
-    
-    if not retrieved_chunks_content:
-        logger.error(f"Failed to retrieve content for any of the matching IDs: {neighbor_ids}")
-        # Fall back to simple answer instead of raising an exception
-        prompt = f"""You are an expert assistant knowledgeable about the Minnesota EIDBI program.
-Answer the following question as best you can with general knowledge.
-
-Question: {request.query_text}
-
-Answer:"""
-        
-        fallback_answer = generate_text_response(prompt)
-        if not fallback_answer:
-            fallback_answer = "I apologize, but I could not retrieve the relevant content to answer your question accurately."
-            
-        result = {
-            "query": request.query_text,
-            "answer": fallback_answer + "\n\n(Note: This response is based on general knowledge as there was an error retrieving specific content.)",
-            "retrieved_chunk_ids": [],
-            "cached": False,
-            "version": APP_VERSION
-        }
-        
-        # Cache the result
-        query_cache.set(request.query_text, request.num_results, False, result)
-        
-        return QueryResponse(**result)
-
-    # 4. Construct Prompt and Query LLM
-    prompt = construct_llm_prompt(request.query_text, retrieved_chunks_content)
-    logger.debug(f"Generated LLM Prompt:\n{prompt}")
-
-    llm_answer = generate_text_response(prompt)
-
-    if llm_answer is None:
-        logger.error("LLM failed to generate a response.")
-        raise HTTPException(status_code=500, detail="AI failed to generate an answer.")
-
-    # 5. Format and Return Response
-    query_duration_ms = int((time.time() - query_start_time) * 1000)
-    logger.info(f"Successfully generated LLM answer in {query_duration_ms}ms")
-    
-    result = {
-        "query": request.query_text,
-        "answer": llm_answer.strip(),
-        "retrieved_chunk_ids": neighbor_ids,
-        "cached": False,
-        "version": APP_VERSION
-    }
-    
-    # Cache the result
-    query_cache.set(request.query_text, request.num_results, False, result)
-    
-    return QueryResponse(**result)
-
 # Add script entry point to run directly
 if __name__ == "__main__":
     import uvicorn
     port = int(os.getenv("PORT", "8000"))
     host = os.getenv("HOST", "0.0.0.0")
-    logger.info(f"Starting server on {host}:{port}")
+    logger.info(f"Starting enhanced server on {host}:{port}")
     uvicorn.run("main:app", host=host, port=port) 

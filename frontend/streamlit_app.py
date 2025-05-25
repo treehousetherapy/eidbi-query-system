@@ -16,7 +16,7 @@ logger = logging.getLogger(__name__)
 
 # --- Application Version ---
 APP_VERSION = "1.1.2"
-APP_NAME = "EIDBI Query Assistant"
+APP_NAME = "Ask EIDBI Assistant"
 
 # --- Configuration ---
 # Allow configuration from environment variables
@@ -61,7 +61,7 @@ if 'show_welcome' not in st.session_state:
 # --- Custom CSS ---
 st.set_page_config(
     layout="wide", 
-    page_title=f"{APP_NAME}", 
+    page_title="Ask EIDBI Assistant", 
     page_icon="🤖",
     initial_sidebar_state="expanded"
 )
@@ -535,7 +535,9 @@ with st.sidebar:
     # Bottom section with credits
     st.markdown("""
     <div style="position: absolute; bottom: 20px; left: 20px; right: 20px; color: #8E8EA0; font-size: 0.8rem;">
-        <p>Created for Minnesota EIDBI Program</p>
+        <p>Ask EIDBI • Powered by AI</p>
+        <p>Sponsored by Treehouse Therapy Center LLC</p>
+        <p style="margin-top: 0.5rem;">Created for Minnesota EIDBI Program</p>
     </div>
     """, unsafe_allow_html=True)
 

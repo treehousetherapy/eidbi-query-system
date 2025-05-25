@@ -12,28 +12,49 @@ steps:
     id: 'push-backend'
     waitFor: ['build-backend']
 
-  # Deploy backend to Cloud Run - with debug flag
+  # Create Artifact Registry repository if it doesn't exist
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
-    entrypoint: gcloud
+    entrypoint: bash
     args:
-      - 'run'
-      - 'deploy'
-      - 'eidbi-backend-service'
-      - '--image'
-      - 'us-central1-docker.pkg.dev/$PROJECT_ID/cloud-run-source-deploy/eidbi-backend:$COMMIT_SHA'
-      - '--region'
-      - 'us-central1'
-      - '--platform'
-      - 'managed'
-      - '--service-account'
-      - 'id-eidbi-service-account@lyrical-ward-454915-e6.iam.gserviceaccount.com'
-      - '--set-env-vars'
-      - 'GCP_PROJECT_ID=$PROJECT_ID,GCP_REGION=us-central1,GCP_BUCKET_NAME=eidbi-system-bucket-lyrical-ward'
-      - '--allow-unauthenticated'
-      - '--verbosity=debug'
-      - '--log-http'
-    id: 'deploy-backend'
+      - '-c'
+      - |
+        echo "Creating Artifact Registry repository if it doesn't exist..."
+        gcloud artifacts repositories describe cloud-run-source-deploy --location=us-central1 || \
+        gcloud artifacts repositories create cloud-run-source-deploy --repository-format=docker \
+        --location=us-central1 --description="Repository for EIDBI Query System"
+    id: 'ensure-artifact-repo'
     waitFor: ['push-backend']
+
+  # Deploy backend to Cloud Run - with debug flags
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    entrypoint: bash
+    args:
+      - '-c'
+      - |
+        echo "Deploying backend service..."
+        gcloud run deploy eidbi-backend-service \
+        --image="us-central1-docker.pkg.dev/$PROJECT_ID/cloud-run-source-deploy/eidbi-backend:$COMMIT_SHA" \
+        --region=us-central1 \
+        --platform=managed \
+        --service-account=id-eidbi-service-account@lyrical-ward-454915-e6.iam.gserviceaccount.com \
+        --set-env-vars=GCP_PROJECT_ID=$PROJECT_ID,GCP_REGION=us-central1,GCP_BUCKET_NAME=eidbi-system-bucket-lyrical-ward \
+        --allow-unauthenticated
+        
+        if [ $? -ne 0 ]; then
+          echo "ERROR: Backend deployment failed. Checking service account roles..."
+          gcloud projects get-iam-policy $PROJECT_ID --flatten="bindings[].members" \
+          --format="table(bindings.role)" \
+          --filter="bindings.members:id-eidbi-service-account@lyrical-ward-454915-e6.iam.gserviceaccount.com"
+          
+          echo "Checking Cloud Build service account roles..."
+          gcloud projects get-iam-policy $PROJECT_ID --flatten="bindings[].members" \
+          --format="table(bindings.role)" \
+          --filter="bindings.members:$PROJECT_ID@cloudbuild.gserviceaccount.com"
+          
+          exit 1
+        fi
+    id: 'deploy-backend'
+    waitFor: ['ensure-artifact-repo']
 
   # Get the backend URL
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
@@ -44,7 +65,9 @@ steps:
         gcloud run services describe eidbi-backend-service \
           --platform managed \
           --region us-central1 \
-          --format 'value(status.url)' > /workspace/backend_url.txt
+          --format 'value(status.url)' | sed 's%^%export BACKEND_URL=%g' > /workspace/backend_url.txt
+        echo "Backend URL captured in /workspace/backend_url.txt"
+        cat /workspace/backend_url.txt # For logging purposes
     id: 'get-backend-url'
     waitFor: ['deploy-backend']
 
@@ -61,24 +84,26 @@ steps:
 
   # Deploy frontend to Cloud Run
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
-    entrypoint: gcloud
+    entrypoint: bash
     args:
-      - 'run'
-      - 'deploy'
-      - 'eidbi-frontend-service'
-      - '--image'
-      - 'us-central1-docker.pkg.dev/$PROJECT_ID/cloud-run-source-deploy/eidbi-frontend:$COMMIT_SHA'
-      - '--region'
-      - 'us-central1'
-      - '--platform'
-      - 'managed'
-      - '--service-account'
-      - 'id-eidbi-service-account@lyrical-ward-454915-e6.iam.gserviceaccount.com'
-      - '--set-env-vars'
-      - 'BACKEND_URL=$(cat /workspace/backend_url.txt)'
-      - '--allow-unauthenticated'
-      - '--verbosity=debug'
-      - '--log-http'
+      - '-c'
+      - |
+        echo "Deploying frontend service..."
+        source /workspace/backend_url.txt # This file should contain export BACKEND_URL=...
+        echo "Using backend URL: $$BACKEND_URL"
+        
+        gcloud run deploy eidbi-frontend-service \
+        --image="us-central1-docker.pkg.dev/$PROJECT_ID/cloud-run-source-deploy/eidbi-frontend:$COMMIT_SHA" \
+        --region=us-central1 \
+        --platform=managed \
+        --service-account=id-eidbi-service-account@lyrical-ward-454915-e6.iam.gserviceaccount.com \
+        --set-env-vars=BACKEND_URL=$$BACKEND_URL \
+        --allow-unauthenticated
+        
+        if [ $? -ne 0 ]; then
+          echo "ERROR: Frontend deployment failed"
+          exit 1
+        fi
     id: 'deploy-frontend'
     waitFor: ['push-frontend', 'get-backend-url']
 

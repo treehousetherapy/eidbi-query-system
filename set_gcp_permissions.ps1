@@ -63,6 +63,22 @@ gcloud projects add-iam-policy-binding $GcpProjectId `
   --role="roles/storage.admin"
 if ($LASTEXITCODE -ne 0) { Write-Host "Failed." -ForegroundColor Red } else { Write-Host "Done." -ForegroundColor Green }
 
+# Grant Artifact Registry Admin to the Cloud Build service account
+# This allows Cloud Build to create and manage Artifact Registry repositories
+Write-Host "Granting roles/artifactregistry.admin to $CloudBuildServiceAccount..." -ForegroundColor Yellow
+gcloud projects add-iam-policy-binding $GcpProjectId `
+  --member="serviceAccount:$CloudBuildServiceAccount" `
+  --role="roles/artifactregistry.admin"
+if ($LASTEXITCODE -ne 0) { Write-Host "Failed." -ForegroundColor Red } else { Write-Host "Done." -ForegroundColor Green }
+
+# Grant Cloud Build Writer permission to the Cloud Build service account
+# This enables writing build logs
+Write-Host "Granting roles/logging.logWriter to $CloudBuildServiceAccount..." -ForegroundColor Yellow
+gcloud projects add-iam-policy-binding $GcpProjectId `
+  --member="serviceAccount:$CloudBuildServiceAccount" `
+  --role="roles/logging.logWriter"
+if ($LASTEXITCODE -ne 0) { Write-Host "Failed." -ForegroundColor Red } else { Write-Host "Done." -ForegroundColor Green }
+
 Write-Host "`n--- Permissions script finished. ---" -ForegroundColor Cyan
 Write-Host "Please ensure the following bucket exists for the backend service:" -ForegroundColor Yellow
 Write-Host "$BackendDataBucket" -ForegroundColor Yellow
