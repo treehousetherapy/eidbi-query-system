@@ -4,15 +4,23 @@ import logging
 import time
 import re
 from typing import Optional
+import os
 
 # Try both import methods for flexibility
 try:
-    from vertexai.language_models import TextGenerationModel
+    from vertexai.generative_models import GenerativeModel
     using_vertexai_sdk = True
+    using_gemini = True
 except ImportError:
-    using_vertexai_sdk = False
-    logger = logging.getLogger(__name__)
-    logger.warning("Could not import vertexai.language_models, will try google.cloud.aiplatform")
+    try:
+        from vertexai.language_models import TextGenerationModel
+        using_vertexai_sdk = True
+        using_gemini = False
+    except ImportError:
+        using_vertexai_sdk = False
+        using_gemini = False
+        logger = logging.getLogger(__name__)
+        logger.warning("Could not import vertexai models, will try google.cloud.aiplatform")
 
 # Import the Google Cloud AI Platform libraries
 from google.cloud import aiplatform
@@ -20,9 +28,8 @@ from google.cloud.aiplatform.gapic.schema import predict
 
 # --- Import Settings and Initializer ---
 try:
-    # Remove the old sys.path manipulation
-    # We now rely on the project root being in sys.path (added in main.py)
-    from scraper.utils.vertex_ai_utils import initialize_vertex_ai, LOCATION, PROJECT_ID
+    # Import from backend's utils
+    from utils.vertex_ai_utils import initialize_vertex_ai, LOCATION, PROJECT_ID
 except ImportError as e:
     # Logger might not be initialized here yet
     print(f"ERROR in {__name__}: Failed to import shared Vertex AI utils: {e}")
@@ -37,11 +44,14 @@ except ImportError as e:
 logger = logging.getLogger(__name__)
 
 # Configuration
-LLM_MODEL_NAME = "text-bison@002" # Or the latest available/preferred version
+LLM_MODEL_NAME = "text-bison" # Using text-bison model which is more widely available
 DEFAULT_MAX_OUTPUT_TOKENS = 1024
 DEFAULT_TEMPERATURE = 0.2
 DEFAULT_TOP_P = 0.8
 DEFAULT_TOP_K = 40
+
+# Check if we should use mock responses
+USE_MOCK_RESPONSES = os.getenv("MOCK_LLM_RESPONSES", "false").lower() == "true"
 
 # Global variable for model instance
 _llm_model_instance: Optional[object] = None
@@ -104,10 +114,9 @@ through evidence-based interventions. Services are individualized based on a com
 and are coordinated with families, schools, and other providers to support the individual's development."""
 
 def _get_llm_model(model_name: str = LLM_MODEL_NAME) -> Optional[object]:
-    """Gets or initializes the TextGenerationModel instance."""
+    """Gets or initializes the model instance."""
     global _llm_model_instance
     if _llm_model_instance:
-        # TODO: Check if model_name matches cached instance if allowing overrides
         return _llm_model_instance
 
     if not initialize_vertex_ai():
@@ -116,26 +125,43 @@ def _get_llm_model(model_name: str = LLM_MODEL_NAME) -> Optional[object]:
 
     try:
         if using_vertexai_sdk:
-            logger.info(f"Initializing LLM model via vertexai SDK: {model_name}")
-            _llm_model_instance = TextGenerationModel.from_pretrained(model_name)
-            logger.info("LLM model initialized via vertexai SDK.")
+            # Try Gemini first as it's more current and reliable
+            if using_gemini and "gemini" in model_name.lower():
+                logger.info(f"Initializing Gemini model: {model_name}")
+                _llm_model_instance = GenerativeModel(model_name)
+                logger.info("Gemini model initialized successfully.")
+            elif not using_gemini or "text-bison" in model_name:
+                logger.info(f"Initializing text generation model: {model_name}")
+                _llm_model_instance = TextGenerationModel.from_pretrained(model_name)
+                logger.info("Text generation model initialized successfully.")
+            else:
+                # Fallback to Gemini if text-bison fails
+                logger.info(f"Falling back to Gemini model: gemini-1.5-flash")
+                _llm_model_instance = GenerativeModel("gemini-1.5-flash")
+                logger.info("Gemini fallback model initialized successfully.")
         else:
             logger.info(f"Using direct aiplatform API for model: {model_name}")
-            # Store the model name as we'll use it directly with predict client
             _llm_model_instance = model_name
             logger.info(f"Using model name: {_llm_model_instance} with aiplatform client")
         
         return _llm_model_instance
     except Exception as e:
-        logger.error(f"Failed to initialize LLM model {model_name}: {e}", exc_info=True)
+        logger.error(f"Failed to initialize model {model_name}: {e}", exc_info=True)
+        # Try fallback to Gemini if available
+        if using_gemini and model_name != "gemini-1.5-flash":
+            try:
+                logger.info("Attempting fallback to Gemini model...")
+                _llm_model_instance = GenerativeModel("gemini-1.5-flash")
+                logger.info("Gemini fallback model initialized successfully.")
+                return _llm_model_instance
+            except Exception as fallback_error:
+                logger.error(f"Fallback to Gemini also failed: {fallback_error}")
         return None
 
 def generate_text_response(prompt: str) -> Optional[str]:
     """
-    Generate a response to the given prompt using a rule-based approach.
-    
-    This is a mock implementation that doesn't require an actual LLM API.
-    In a real implementation, this would call a Vertex AI LLM or other text generation service.
+    Generate a response to the given prompt using Vertex AI models.
+    Falls back to mock implementation if Vertex AI is not available.
     
     Args:
         prompt: The prompt to generate a response for
@@ -143,55 +169,44 @@ def generate_text_response(prompt: str) -> Optional[str]:
     Returns:
         The generated response, or None if generation fails
     """
-    logger.info(f"Generating mock response for prompt: {prompt[:100]}...")
+    # Check if we should use mock responses
+    if USE_MOCK_RESPONSES:
+        logger.info("Using mock responses (MOCK_LLM_RESPONSES=true)")
+        return _generate_offline_response(prompt)
     
-    try:
-        # Check if this is a context-based query
-        is_context_based = "based *only* on the provided context" in prompt
-        
-        # Extract the question from the prompt
-        question_match = re.search(r"Question: (.*?)(?:\n\nContext:|\n\nAnswer:)", prompt, re.DOTALL)
-        question = question_match.group(1).strip() if question_match else "Unknown question"
-        
-        # Simple rule-based response generation
-        response = ""
-        
-        # Simulate response delay
-        time.sleep(1)
-        
-        if is_context_based:
-            # Extract context
-            context_match = re.search(r"Context:(.*?)(?:\n\nAnswer:)", prompt, re.DOTALL)
-            context = context_match.group(1).strip() if context_match else ""
+    # Try to use real Vertex AI first
+    model = _get_llm_model()
+    
+    if model and using_vertexai_sdk:
+        try:
+            logger.info(f"Generating response using Vertex AI for prompt: {prompt[:100]}...")
             
-            # If context contains keywords related to the question, generate a response
-            # Otherwise, indicate that the answer is not in the context
+            # Use text-bison model (more stable)
+            if not using_gemini or "text-bison" in LLM_MODEL_NAME:
+                response = model.predict(
+                    prompt,
+                    max_output_tokens=DEFAULT_MAX_OUTPUT_TOKENS,
+                    temperature=DEFAULT_TEMPERATURE,
+                    top_p=DEFAULT_TOP_P,
+                    top_k=DEFAULT_TOP_K,
+                )
+                generated_text = response.text
+            else:
+                # Use Gemini model
+                response = model.generate_content(prompt)
+                generated_text = response.text
             
-            if "EIDBI" in context or "Early Intensive Developmental and Behavioral Intervention" in context:
-                if "eligible" in question.lower() or "who can" in question.lower():
-                    response = "Based on the provided context, children and youth under 21 who have autism spectrum disorder or a related condition may be eligible for EIDBI services. A comprehensive evaluation must determine that EIDBI services are medically necessary."
-                elif "cost" in question.lower() or "fee" in question.lower() or "pay" in question.lower():
-                    response = "According to the provided information, EIDBI services are covered by Medical Assistance (MA) and some private insurance plans. Families should check with their insurance provider for specific coverage details."
-                elif "services" in question.lower() or "provide" in question.lower() or "offer" in question.lower():
-                    response = "Based on the context, EIDBI services may include individual, group, and family interventions designed to improve social, communication, and behavioral skills. The specific services are tailored to the individual's needs as determined by a comprehensive assessment."
-                else:
-                    response = "I cannot find specific information about this topic in the provided context. The context primarily discusses general aspects of the EIDBI program without addressing this specific question."
-            else:
-                response = "I cannot answer the question based on the provided information. The context doesn't contain relevant details about the EIDBI program to address your query."
-        else:
-            # Generic responses for non-context questions
-            if "EIDBI" in question:
-                response = "EIDBI (Early Intensive Developmental and Behavioral Intervention) is a program designed to help children and youth with autism spectrum disorder and related conditions. It provides intensive, individualized services to improve social interaction, communication, and behavior skills."
-            elif "autism" in question.lower():
-                response = "Autism spectrum disorder (ASD) is a developmental condition that affects communication, social interaction, and behavior. The Minnesota EIDBI program provides services specifically designed to help individuals with ASD and related conditions."
-            else:
-                response = "I'm a mock implementation of an AI assistant focused on providing information about the Minnesota EIDBI program. I can answer questions about eligibility, services, and other aspects of the program."
-        
-        logger.info(f"Generated mock response: {response[:100]}...")
-        return response
-    except Exception as e:
-        logger.error(f"Error generating mock response: {e}", exc_info=True)
-        return "I apologize, but I encountered an error while trying to generate a response. Please try again."
+            logger.info(f"Successfully generated response: {generated_text[:100]}...")
+            return generated_text
+            
+        except Exception as e:
+            logger.error(f"Error using Vertex AI text generation: {e}", exc_info=True)
+            logger.info("Falling back to offline response")
+            return _generate_offline_response(prompt)
+    
+    # Fall back to offline response
+    logger.info("Vertex AI not available, using offline response")
+    return _generate_offline_response(prompt)
 
 # --- Example Usage ---
 if __name__ == '__main__':
