@@ -9,6 +9,7 @@ import os
 # Try both import methods for flexibility
 try:
     from vertexai.generative_models import GenerativeModel
+    from vertexai.language_models import TextGenerationModel
     using_vertexai_sdk = True
     using_gemini = True
 except ImportError:
@@ -125,20 +126,21 @@ def _get_llm_model(model_name: str = LLM_MODEL_NAME) -> Optional[object]:
 
     try:
         if using_vertexai_sdk:
-            # Try Gemini first as it's more current and reliable
-            if using_gemini and "gemini" in model_name.lower():
-                logger.info(f"Initializing Gemini model: {model_name}")
-                _llm_model_instance = GenerativeModel(model_name)
-                logger.info("Gemini model initialized successfully.")
-            elif not using_gemini or "text-bison" in model_name:
+            # Use text-bison model
+            if "text-bison" in model_name:
                 logger.info(f"Initializing text generation model: {model_name}")
                 _llm_model_instance = TextGenerationModel.from_pretrained(model_name)
                 logger.info("Text generation model initialized successfully.")
+            # Use Gemini model
+            elif "gemini" in model_name.lower():
+                logger.info(f"Initializing Gemini model: {model_name}")
+                _llm_model_instance = GenerativeModel(model_name)
+                logger.info("Gemini model initialized successfully.")
             else:
-                # Fallback to Gemini if text-bison fails
-                logger.info(f"Falling back to Gemini model: gemini-1.5-flash")
-                _llm_model_instance = GenerativeModel("gemini-1.5-flash")
-                logger.info("Gemini fallback model initialized successfully.")
+                # Default to text-bison
+                logger.info(f"Defaulting to text-bison model")
+                _llm_model_instance = TextGenerationModel.from_pretrained("text-bison")
+                logger.info("Text-bison model initialized successfully.")
         else:
             logger.info(f"Using direct aiplatform API for model: {model_name}")
             _llm_model_instance = model_name
@@ -147,15 +149,6 @@ def _get_llm_model(model_name: str = LLM_MODEL_NAME) -> Optional[object]:
         return _llm_model_instance
     except Exception as e:
         logger.error(f"Failed to initialize model {model_name}: {e}", exc_info=True)
-        # Try fallback to Gemini if available
-        if using_gemini and model_name != "gemini-1.5-flash":
-            try:
-                logger.info("Attempting fallback to Gemini model...")
-                _llm_model_instance = GenerativeModel("gemini-1.5-flash")
-                logger.info("Gemini fallback model initialized successfully.")
-                return _llm_model_instance
-            except Exception as fallback_error:
-                logger.error(f"Fallback to Gemini also failed: {fallback_error}")
         return None
 
 def generate_text_response(prompt: str) -> Optional[str]:
@@ -181,8 +174,8 @@ def generate_text_response(prompt: str) -> Optional[str]:
         try:
             logger.info(f"Generating response using Vertex AI for prompt: {prompt[:100]}...")
             
-            # Use text-bison model (more stable)
-            if not using_gemini or "text-bison" in LLM_MODEL_NAME:
+            # Check if it's a TextGenerationModel (text-bison)
+            if hasattr(model, 'predict'):
                 response = model.predict(
                     prompt,
                     max_output_tokens=DEFAULT_MAX_OUTPUT_TOKENS,
@@ -191,8 +184,8 @@ def generate_text_response(prompt: str) -> Optional[str]:
                     top_k=DEFAULT_TOP_K,
                 )
                 generated_text = response.text
+            # Otherwise it's a GenerativeModel (Gemini)
             else:
-                # Use Gemini model
                 response = model.generate_content(prompt)
                 generated_text = response.text
             
