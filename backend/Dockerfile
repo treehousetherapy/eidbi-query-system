@@ -10,6 +10,9 @@ ENV PYTHONUNBUFFERED 1
 # Set the working directory in the container
 WORKDIR /app
 
+# Add the current directory to Python path for imports to work
+ENV PYTHONPATH=/app
+
 # Install system dependencies if needed (e.g., for certain libraries)
 # RUN apt-get update && apt-get install -y --no-install-recommends some-package && rm -rf /var/lib/apt/lists/*
 
