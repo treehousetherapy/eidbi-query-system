@@ -1,0 +1,11 @@
+{
+  "timestamp": "20250525_200334",
+  "total_chunks": 9,
+  "unique_sources": 1,
+  "source_types": [
+    "government_medicaid"
+  ],
+  "document_types": [
+    "html"
+  ]
+}

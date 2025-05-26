@@ -70,7 +70,8 @@ _vertex_ai_initialized = False
 
 def initialize_vertex_ai_once() -> bool:
     """
-    Mock implementation of initializing Vertex AI.
+    Initialize Vertex AI for embeddings and other services.
+    Uses real Vertex AI if credentials are available, otherwise returns False.
     
     Returns:
         bool: True if the initialization is successful, False otherwise.
@@ -78,21 +79,36 @@ def initialize_vertex_ai_once() -> bool:
     global _vertex_ai_initialized
     
     if _vertex_ai_initialized:
-        logger.info("Mock Vertex AI already initialized, skipping.")
+        logger.info("Vertex AI already initialized, skipping.")
+        return True
+    
+    # Check if we should use mock embeddings
+    use_mock = os.getenv("USE_MOCK_EMBEDDINGS", "false").lower() == "true"
+    if use_mock:
+        logger.info("Mock embeddings enabled via USE_MOCK_EMBEDDINGS environment variable")
+        _vertex_ai_initialized = True
         return True
     
     try:
-        logger.info("Mock initializing Vertex AI...")
+        logger.info("Initializing Vertex AI for enhanced scraper...")
         
-        # In a real implementation, this would initialize Vertex AI
-        # aiplatform.init(project=project_id, location=location)
+        if not PROJECT_ID:
+            logger.error("No GCP project ID available. Cannot initialize Vertex AI.")
+            return False
+        if not LOCATION:
+            logger.error("No GCP location configured. Cannot initialize Vertex AI.")
+            return False
+        
+        # Initialize Vertex AI
+        aiplatform.init(project=PROJECT_ID, location=LOCATION)
         
         _vertex_ai_initialized = True
-        logger.info("Mock Vertex AI initialization successful")
+        logger.info(f"Vertex AI initialization successful for project {PROJECT_ID} in {LOCATION}")
         return True
     
     except Exception as e:
-        logger.error(f"Mock Vertex AI initialization failed: {e}", exc_info=True)
+        logger.error(f"Vertex AI initialization failed: {e}", exc_info=True)
+        logger.info("You can set USE_MOCK_EMBEDDINGS=true to use mock embeddings instead")
         return False
 
 def initialize_vertex_ai():

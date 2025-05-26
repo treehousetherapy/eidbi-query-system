@@ -1,0 +1,27 @@
+# Enhanced EIDBI Scraper Requirements
+# Core dependencies from original scraper
+pydantic>=2.0.0
+pyyaml>=6.0.0
+python-dotenv>=1.0.0
+requests>=2.31.0
+beautifulsoup4>=4.12.0
+google-cloud-storage>=2.10.0
+pydantic-settings>=2.0.0
+google-cloud-aiplatform>=1.35.0
+
+# Enhanced scraper dependencies for PDF processing
+PyPDF2>=3.0.1
+pdfplumber>=0.9.0
+pillow>=10.0.0  # Required for PDF image processing
+
+# Additional utility dependencies
+urllib3>=2.0.0
+chardet>=5.0.0  # Character encoding detection
+python-dateutil>=2.8.0  # Date parsing utilities
+
+# Optional dependencies for better performance
+lxml>=4.9.0  # Faster XML/HTML parsing
+cchardet>=2.1.7  # Faster character detection alternative
+
+# Logging and monitoring
+structlog>=23.0.0  # Better structured logging 

@@ -26,6 +26,9 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Make sure .dockerignore excludes venv, __pycache__, etc.
 COPY . .
 
+# Copy the vector database file explicitly to ensure it's included
+COPY local_scraped_data_with_embeddings.jsonl /app/local_scraped_data_with_embeddings.jsonl
+
 # Cloud Run sets the PORT environment variable automatically
 ENV PORT 8080
 

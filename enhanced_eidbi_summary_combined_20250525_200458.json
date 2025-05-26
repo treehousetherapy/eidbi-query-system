@@ -1,0 +1,13 @@
+{
+  "timestamp": "20250525_200458",
+  "total_chunks": 59,
+  "unique_sources": 3,
+  "source_types": [
+    "advocacy_org",
+    "government_medicaid",
+    "legislation"
+  ],
+  "document_types": [
+    "html"
+  ]
+}
