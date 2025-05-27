@@ -1,0 +1,57 @@
+
+Subject: Formal Request for EIDBI Medicaid Provider Enrollment and Claims Data - Research Purpose
+
+Dear Minnesota Department of Human Services Data Team,
+
+I am writing to formally request access to Early Intensive Developmental and Behavioral Intervention (EIDBI) Medicaid provider enrollment and claims data for research and public information purposes.
+
+REQUESTED DATA:
+1. EIDBI Provider Enrollment Data:
+   - Total number of enrolled EIDBI providers by county
+   - Provider enrollment trends over the past 3 years
+   - Provider specialty classifications within EIDBI services
+   - Geographic distribution of providers across Minnesota
+
+2. EIDBI Claims Summary Data (Aggregated/De-identified):
+   - Total EIDBI claims volume by fiscal year
+   - Service utilization patterns by region
+   - Average claims per provider
+   - Service type breakdown within EIDBI
+
+3. Provider Network Adequacy Data:
+   - Provider-to-population ratios by county
+   - Wait times and access metrics (if available)
+   - Provider capacity and availability data
+
+PURPOSE:
+This data will be used to enhance a public information system designed to help families and providers better understand EIDBI service availability and access in Minnesota. The system aims to improve transparency and accessibility of EIDBI program information.
+
+DATA HANDLING:
+- All data will be used solely for research and public information purposes
+- No individual provider or patient information is requested
+- All data will be handled in accordance with HIPAA and state privacy regulations
+- Results will be made publicly available to benefit the EIDBI community
+
+DELIVERY FORMAT:
+- CSV or Excel format preferred
+- JSON format acceptable
+- Aggregated data only (no individual records)
+
+TIMELINE:
+We would appreciate receiving this data within 30-45 days if possible, though we understand processing may take longer based on your procedures.
+
+Thank you for your consideration of this request. Please let me know if you need any additional information or if there are specific procedures I should follow for this type of data request.
+
+Best regards,
+
+[Your Name]
+[Your Title/Organization]
+[Contact Information]
+[Date]
+
+---
+FOLLOW-UP ACTIONS:
+1. Send this request to: dhs.data.requests@state.mn.us
+2. CC: medicaid.policy@state.mn.us
+3. Follow up in 2 weeks if no response
+4. Be prepared to provide additional justification or modify request scope

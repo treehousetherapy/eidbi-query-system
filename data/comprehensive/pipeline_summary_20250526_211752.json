@@ -1,0 +1,107 @@
+{
+  "pipeline_run": {
+    "start_time": "2025-05-26T21:17:04.246830",
+    "end_time": "2025-05-26T21:17:52.807322",
+    "duration_minutes": 0.8093415333333334,
+    "success": false,
+    "total_items_collected": 88,
+    "total_items_processed": 88
+  },
+  "source_summary": {
+    "dhs_eidbi_manual": {
+      "status": "pending",
+      "data_count": 0,
+      "error": null
+    },
+    "dhs_medicaid_manual": {
+      "status": "pending",
+      "data_count": 0,
+      "error": null
+    },
+    "dhs_billing_guide": {
+      "status": "pending",
+      "data_count": 0,
+      "error": null
+    },
+    "dhs_annual_report": {
+      "status": "pending",
+      "data_count": 0,
+      "error": null
+    },
+    "mhcp_provider_directory": {
+      "status": "completed",
+      "data_count": 78,
+      "error": null
+    },
+    "mhcp_enrollment_data": {
+      "status": "pending",
+      "data_count": 0,
+      "error": null
+    },
+    "mhcp_claims_summary": {
+      "status": "pending",
+      "data_count": 0,
+      "error": null
+    },
+    "mhcp_provider_manual": {
+      "status": "pending",
+      "data_count": 0,
+      "error": null
+    },
+    "npi_registry": {
+      "status": "pending",
+      "data_count": 0,
+      "error": null
+    },
+    "autism_society_mn": {
+      "status": "pending",
+      "data_count": 0,
+      "error": null
+    },
+    "arc_minnesota": {
+      "status": "pending",
+      "data_count": 0,
+      "error": null
+    },
+    "disability_rights_mn": {
+      "status": "pending",
+      "data_count": 0,
+      "error": null
+    },
+    "abai_minnesota": {
+      "status": "completed",
+      "data_count": 5,
+      "error": null
+    },
+    "blue_cross_mn": {
+      "status": "pending",
+      "data_count": 0,
+      "error": null
+    },
+    "healthpartners": {
+      "status": "pending",
+      "data_count": 0,
+      "error": null
+    },
+    "medica": {
+      "status": "pending",
+      "data_count": 0,
+      "error": null
+    },
+    "ucare": {
+      "status": "pending",
+      "data_count": 0,
+      "error": null
+    },
+    "mn_open_data": {
+      "status": "pending",
+      "data_count": 0,
+      "error": null
+    },
+    "data_gov": {
+      "status": "pending",
+      "data_count": 0,
+      "error": null
+    }
+  }
+}

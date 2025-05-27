@@ -60,7 +60,9 @@ class PromptEngineeringService:
             QueryType.PROVIDER: [
                 r'\b(provider|therapist|professional|staff|who provides)\b',
                 r'\b(bcba|behavior analyst|psychologist|specialist)\b',
-                r'\b(qualifications?|certified|licensed|training)\b'
+                r'\b(qualifications?|certified|licensed|training)\b',
+                r'\b(how many|number of|count|total)\b.*\b(provider|therapist)\b',
+                r'\b(provider.*count|therapist.*count)\b'
             ],
             QueryType.DEFINITION: [
                 r'\b(what is|define|definition|meaning|means)\b',
@@ -190,6 +192,40 @@ Instructions:
 - Address common follow-up questions
 - Include practical information about payment/coverage
 - Use simple, non-technical language
+
+Answer:"""
+            },
+            
+            QueryType.PROVIDER: {
+                ResponseFormat.CONCISE: """You are an expert on the Minnesota EIDBI program. Answer the provider-related question directly and accurately.
+
+Question: {query}
+
+Context: {context}
+
+Instructions:
+- If asking about provider counts/numbers: Check if exact numbers are available in the context
+- If exact provider count NOT found in context, explicitly state: "The exact number of EIDBI providers is not specified in the available information."
+- Provide fallback guidance: "For the most current and accurate provider count, please consult the official Minnesota DHS Provider Directory or contact Minnesota DHS directly."
+- If describing provider qualifications, use only information from the context
+- Include actionable next steps when possible
+- Keep response under 150 words
+
+Answer:""",
+                
+                ResponseFormat.DETAILED: """You are an expert on the Minnesota EIDBI program. Provide comprehensive information about EIDBI providers.
+
+Question: {query}
+
+Context: {context}
+
+Instructions:
+- For provider count questions: Search carefully for specific numbers in the context
+- If exact numbers are NOT available, clearly state: "The exact number of EIDBI providers is not provided in the current information."
+- Always include this fallback: "For the most accurate and up-to-date provider count and directory, please refer to the official Minnesota DHS resources at https://www.dhs.state.mn.us/"
+- Cover provider qualifications, services, and how to find providers
+- Organize information with clear headings
+- Include practical guidance for finding and selecting providers
 
 Answer:"""
             },

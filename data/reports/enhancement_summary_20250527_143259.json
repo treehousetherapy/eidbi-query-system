@@ -1,0 +1,20 @@
+{
+  "report_id": "5c251142",
+  "timestamp": "2025-05-27T14:32:59.132448",
+  "previous_coverage": {
+    "funding_budget": 0.6,
+    "overall": 0.846
+  },
+  "current_coverage": {
+    "funding_budget": 0.85,
+    "overall": 0.882
+  },
+  "improvements": {
+    "funding_budget": 0.25,
+    "overall": 0.036
+  },
+  "items_added": 8,
+  "total_chunks": 429,
+  "deployment_status": "operational",
+  "url": "https://askeidbi.org"
+}

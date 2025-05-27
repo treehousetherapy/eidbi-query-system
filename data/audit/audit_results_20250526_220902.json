@@ -1,0 +1,128 @@
+{
+  "audit_id": "7cfb70f9",
+  "timestamp": "2025-05-26T22:09:02.746507",
+  "duration_seconds": 0.208135,
+  "total_topics": 9,
+  "fully_covered": 8,
+  "partially_covered": 1,
+  "not_covered": 0,
+  "coverage_matrix_file": "data\\audit\\coverage_matrix_20250526_220902.csv",
+  "gap_analysis_file": "data\\audit\\gap_analysis_report_20250526_220902.md",
+  "priority_topics": [
+    {
+      "topic": "Billing and Claims Procedures",
+      "status": "Fully covered",
+      "coverage_score": 0.877,
+      "priority_score": 10.0,
+      "missing_subtopics": [],
+      "chunk_count": 383
+    },
+    {
+      "topic": "Provider Network and Availability",
+      "status": "Fully covered",
+      "coverage_score": 0.817,
+      "priority_score": 10.0,
+      "missing_subtopics": [
+        "Geographic distribution"
+      ],
+      "chunk_count": 231
+    },
+    {
+      "topic": "Service Descriptions and Scope",
+      "status": "Fully covered",
+      "coverage_score": 1.0,
+      "priority_score": 10.0,
+      "missing_subtopics": [],
+      "chunk_count": 386
+    },
+    {
+      "topic": "Eligibility and Enrollment Processes",
+      "status": "Fully covered",
+      "coverage_score": 0.964,
+      "priority_score": 10.0,
+      "missing_subtopics": [],
+      "chunk_count": 311
+    },
+    {
+      "topic": "Program Policies and Compliance",
+      "status": "Fully covered",
+      "coverage_score": 0.823,
+      "priority_score": 10.0,
+      "missing_subtopics": [
+        "Audit processes"
+      ],
+      "chunk_count": 176
+    },
+    {
+      "topic": "Training and Support Resources",
+      "status": "Fully covered",
+      "coverage_score": 0.81,
+      "priority_score": 10.0,
+      "missing_subtopics": [
+        "Workshops"
+      ],
+      "chunk_count": 277
+    },
+    {
+      "topic": "Outcome Measures and Quality Assurance",
+      "status": "Fully covered",
+      "coverage_score": 0.92,
+      "priority_score": 7.9,
+      "missing_subtopics": [],
+      "chunk_count": 160
+    },
+    {
+      "topic": "Funding and Budget Information",
+      "status": "Partially covered",
+      "coverage_score": 0.6,
+      "priority_score": 7.6,
+      "missing_subtopics": [
+        "Budget allocations",
+        "Expenditure reports"
+      ],
+      "chunk_count": 57
+    },
+    {
+      "topic": "Technology and Tools",
+      "status": "Fully covered",
+      "coverage_score": 0.8,
+      "priority_score": 5.1,
+      "missing_subtopics": [],
+      "chunk_count": 106
+    }
+  ],
+  "recommended_sources": {
+    "Funding and Budget Information": [
+      {
+        "name": "DHS EIDBI Provider Manual",
+        "url": "https://www.dhs.state.mn.us/main/idcplg?IdcService=GET_DYNAMIC_CONVERSION&RevisionSelectionMethod=LatestReleased&dDocName=dhs16_140346",
+        "type": "government_pdf",
+        "priority": 1
+      },
+      {
+        "name": "DHS Medicaid Provider Manual",
+        "url": "https://www.dhs.state.mn.us/main/idcplg?IdcService=GET_DYNAMIC_CONVERSION&RevisionSelectionMethod=LatestReleased&dDocName=dhs-292229",
+        "type": "government_pdf",
+        "priority": 1
+      },
+      {
+        "name": "DHS EIDBI Billing Guide",
+        "url": "https://www.dhs.state.mn.us/main/idcplg?IdcService=GET_DYNAMIC_CONVERSION&RevisionSelectionMethod=LatestReleased&dDocName=DHS-293657",
+        "type": "government_pdf",
+        "priority": 1
+      },
+      {
+        "name": "Minnesota Legislature EIDBI Statutes",
+        "url": "https://www.revisor.mn.gov/statutes/cite/256B.0943",
+        "type": "legislation",
+        "priority": 1
+      },
+      {
+        "name": "Minnesota Open Data Portal",
+        "url": "https://mn.gov/data/",
+        "type": "open_data",
+        "priority": 4
+      }
+    ]
+  }
+}

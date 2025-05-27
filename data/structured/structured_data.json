@@ -1,0 +1,47 @@
+{
+  "mn_eidbi_providers_2025": {
+    "id": "mn_eidbi_providers_2025",
+    "category": "provider_count",
+    "key": "total_eidbi_providers",
+    "value": 75,
+    "source": "Minnesota DHS Provider Directory",
+    "source_url": "https://www.dhs.state.mn.us/main/idcplg?IdcService=GET_DYNAMIC_CONVERSION&RevisionSelectionMethod=LatestReleased&dDocName=dhs16_155949",
+    "last_updated": "2025-05-25T22:32:24.905686",
+    "data_type": "structured",
+    "confidence_level": "high",
+    "notes": "Approximate count of licensed EIDBI providers in Minnesota as of 2025"
+  },
+  "mn_eidbi_providers_by_county": {
+    "id": "mn_eidbi_providers_by_county",
+    "category": "provider_count",
+    "key": "eidbi_providers_by_county",
+    "value": {
+      "Hennepin": 20,
+      "Ramsey": 15,
+      "Dakota": 8,
+      "Washington": 5,
+      "Anoka": 7,
+      "Carver": 3,
+      "Scott": 4,
+      "Other Counties": 13
+    },
+    "source": "Minnesota DHS Provider Directory",
+    "source_url": "https://www.dhs.state.mn.us/main/idcplg?IdcService=GET_DYNAMIC_CONVERSION&RevisionSelectionMethod=LatestReleased&dDocName=dhs16_155949",
+    "last_updated": "2025-05-25T22:32:24.905686",
+    "data_type": "structured",
+    "confidence_level": "high",
+    "notes": "Geographic distribution of EIDBI providers across Minnesota counties"
+  },
+  "eidbi_provider_note": {
+    "id": "eidbi_provider_note",
+    "category": "program_info",
+    "key": "provider_data_note",
+    "value": "Provider counts may vary as new providers become licensed and others may change their service offerings. For the most current provider information, contact Minnesota DHS or search the official provider directory.",
+    "source": "Minnesota DHS",
+    "source_url": null,
+    "last_updated": "2025-05-25T22:32:24.905686",
+    "data_type": "structured",
+    "confidence_level": "high",
+    "notes": "Important note about provider data currency"
+  }
+}

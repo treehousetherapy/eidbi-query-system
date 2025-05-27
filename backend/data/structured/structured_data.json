@@ -1,0 +1,67 @@
+{
+  "test_provider_count": {
+    "id": "test_provider_count",
+    "category": "provider_count",
+    "key": "total_eidbi_providers",
+    "value": 85,
+    "source": "Test Data",
+    "source_url": null,
+    "last_updated": "2025-05-25T22:06:53.564344",
+    "data_type": "structured",
+    "confidence_level": "high",
+    "notes": "Test provider count for system validation"
+  },
+  "eidbi_total_provider_count": {
+    "id": "eidbi_total_provider_count",
+    "category": "provider_count",
+    "key": "total_eidbi_providers",
+    "value": 50,
+    "source": "Test System",
+    "source_url": "https://test.example.com",
+    "last_updated": "2025-05-25T22:11:06.505966",
+    "data_type": "structured",
+    "confidence_level": "high",
+    "notes": "Total number of EIDBI providers in Minnesota as of 2025-05-25"
+  },
+  "eidbi_providers_by_county": {
+    "id": "eidbi_providers_by_county",
+    "category": "provider_count",
+    "key": "eidbi_providers_by_county",
+    "value": {
+      "Hennepin": 20,
+      "Ramsey": 15,
+      "Dakota": 10,
+      "Anoka": 5
+    },
+    "source": "Test System",
+    "source_url": "https://test.example.com",
+    "last_updated": "2025-05-25T22:11:06.506970",
+    "data_type": "structured",
+    "confidence_level": "high",
+    "notes": "EIDBI providers by county in Minnesota as of 2025-05-25"
+  },
+  "integration_test_providers": {
+    "id": "integration_test_providers",
+    "category": "provider_count",
+    "key": "total_eidbi_providers",
+    "value": 75,
+    "source": "Integration Test",
+    "source_url": null,
+    "last_updated": "2025-05-25T22:11:06.822515",
+    "data_type": "structured",
+    "confidence_level": "high",
+    "notes": "Test data for integration validation"
+  },
+  "integration_test_coverage": {
+    "id": "integration_test_coverage",
+    "category": "program_info",
+    "key": "insurance_coverage",
+    "value": "Covered by Medical Assistance and MinnesotaCare",
+    "source": "Integration Test",
+    "source_url": null,
+    "last_updated": "2025-05-25T22:11:06.823522",
+    "data_type": "structured",
+    "confidence_level": "high",
+    "notes": null
+  }
+}

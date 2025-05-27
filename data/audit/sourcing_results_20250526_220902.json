@@ -1,0 +1,20 @@
+{
+  "sourcing_id": "c415c47d",
+  "timestamp": "2025-05-26T22:09:02.964340",
+  "duration_seconds": 0.0,
+  "target_topics": [
+    "Billing and Claims Procedures",
+    "Provider Network and Availability",
+    "Service Descriptions and Scope",
+    "Eligibility and Enrollment Processes",
+    "Program Policies and Compliance"
+  ],
+  "sources_processed": 0,
+  "content_items_collected": 0,
+  "integration_result": {
+    "status": "no_content",
+    "integrated_items": 0
+  },
+  "source_logs": [],
+  "success_rate": 0
+}

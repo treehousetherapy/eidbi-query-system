@@ -1,0 +1,433 @@
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="generator" content="Outside In HTML Converter version 8.5.4"/>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<title></title>
+<style type="text/css">
+<!--
+p         {margin-top: 0px; margin-bottom: 0px}
+h1        {margin-top: 0px; margin-bottom: 0px}
+h2        {margin-top: 0px; margin-bottom: 0px}
+h3        {margin-top: 0px; margin-bottom: 0px}
+h4        {margin-top: 0px; margin-bottom: 0px}
+h5        {margin-top: 0px; margin-bottom: 0px}
+h6        {margin-top: 0px; margin-bottom: 0px}
+.ID96A    {text-align: left; margin-left: 36pt; margin-bottom: 4pt; font-family: Calibri; font-size: 11pt; font-weight: normal; font-style: normal; text-decoration: none}
+.IDC5E    {text-align: left; margin-left: 74.25pt; margin-bottom: 10pt; line-height: 1.15; font-family: Calibri; font-size: 11pt; font-weight: normal; font-style: normal; text-decoration: none}
+.ID0      {font-weight: normal; font-style: normal; text-decoration: none}
+.ID1      {font-weight: normal; font-style: normal; text-decoration: none}
+.ID2      {font-weight: normal; font-style: normal; text-decoration: none}
+.ID3      {font-weight: normal; font-style: normal; text-decoration: none}
+.ID4      {font-weight: normal; font-style: normal; text-decoration: none}
+.ID5      {font-weight: normal; font-style: normal; text-decoration: none}
+.ID6      {font-weight: normal; font-style: normal; text-decoration: none}
+-->
+</style>
+<meta http-equiv="X-UA-Compatible" content="IE=edge"> 
+<meta name="viewport" content="width=device-width, initial-scale=1">	
+<script>document.title = "Limited English Proficiency (LEP) Template";</script>
+
+
+
+
+	<!-- layout_head_section -->
+	<title>Limited English Proficiency (LEP) Template</title>
+
+	<meta name="dc.title" content="Limited English Proficiency (LEP) Template">
+	
+	<meta name="dc.subject" scheme="LIV-MN" content="Limited English Proficiency (LEP) Template">
+	<meta name="dc.description" content="Limited English Proficiency (LEP) Template">
+	<meta name="dc.date.creation" content="2/9/17">
+	<meta name="dc.creator" content="pwama23">
+	<meta name="dc.contributor" content="ann.boerth">
+	<meta name="ContentID" content="DHS-292657">
+	<meta name="dc.date.modified" content="2/9/17 8:41 AM">
+	<meta name="dc.language" content="eng">
+	<meta name="VirtualPath" content="/CountyLink/Training/None/None/None/None/DHS-292657">
+	
+	<link href="//fonts.googleapis.com/css?family=Open+Sans:400,700,800,300" rel="stylesheet" type="text/css">
+	<link rel="stylesheet" href="//use.fontawesome.com/releases/v5.8.1/css/all.css" integrity="sha384-50oBUHEmvpQ+1lW4y57PTFmhCaXp0ML5d60M1M7uH2+nqUivzIebhndOJK28anvf" crossorigin="anonymous">
+	<script src="//code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script> 
+	<script src="//code.jquery.com/ui/1.12.1/jquery-ui.min.js"></script>
+	
+	<script>
+		var thisURL = "DHS-292657";
+		var httpWebRoot = '/main/';
+		var httpCgiPath = '/main/idcplg';
+		var m_Website = "CountyLink";
+		var m_GeneralArea = "Training";
+		var m_BusinessUnit = "None";
+		var m_Section = "None";
+		var m_Category = "None";
+		var m_SubCategory = "None";
+		var m_System_Dir = "";
+		var m_Webasset_Dir = "/main/groups/dev/documents/webasset/";
+		var m_navigationValues = [m_Website, m_GeneralArea, m_BusinessUnit, m_Section, m_Category, m_SubCategory];
+		var getDC = "?IdcService=GET_DYNAMIC_CONVERSION&RevisionSelectionMethod=LatestReleased&dDocName=";
+		var getFl = "";
+	
+	</script>
+	
+	<link rel="stylesheet" href="/main/groups/dev/documents/webasset/w3-unmin.css">
+	<script src="/main/groups/dev/documents/webasset/js_navscripts.js"></script>
+	<script src="/main/groups/dev/documents/webasset/nav_def.js"></script>
+	<script src="/main/groups/dev/documents/webasset/js_reportscripts.js"></script>
+	<script src="/main/groups/dev/documents/webasset/clsitemap.js"></script>
+	<script src="/main/groups/dev/documents/webasset/js_validate.js"></script>
+	<link rel="stylesheet" type="text/css" href="/main/groups/dev/documents/webasset/css_manuals.css">
+	<link rel="stylesheet" type="text/css" href="/main/groups/dev/documents/webasset/css_cl.css">
+	<link rel="stylesheet" type="text/css" href="/main/groups/dev/documents/webasset/css_reportpage.css">
+	<link rel="apple-touch-icon" sizes="180x180" href="/main/groups/dev/documents/webasset/apple-touch-icon.png">
+	<link rel="icon" type="image/png" href="/main/groups/dev/documents/webasset/favicon-32x32.png" sizes="32x32">
+	<link rel="icon" type="image/png" href="/main/groups/dev/documents/webasset/favicon-16x16.png" sizes="16x16">
+	<link rel="mask-icon" href="/main/groups/dev/documents/webasset/safari-pinned-tab.svg" color="#003865">
+	<meta name="theme-color" content="#ffffff">
+	
+	<!-- // layout_head_section -->
+	
+<script>var __uzdbm_1 = "a9358806-6e15-47fe-93a7-40039ea2c704";var __uzdbm_2 = "Mjg2MzI3ZTctY2Nmbi00NDlmLTlhMWYtZDllZjkzYjk5NDVlJDQ3LjQ0LjgwLjEzMA==";var __uzdbm_3 = "7f600045a5a428-3943-4867-acc1-331a75dc3cad17483122246985588-ccb1dfe41081a74e19";var __uzdbm_4 = "false";var __uzdbm_5 = "uzmx";var __uzdbm_6 = "7f9000f7b7df0f-d298-4e40-9fca-62e7b2dbad951-17483122246985588-f9da7782a3245a2319";var __uzdbm_7 = "state.mn.us";</script> <script>   (function (w, d, e, u, c, g, a, b) {     w["SSJSConnectorObj"] = w["SSJSConnectorObj"] || {       ss_cid: c,       domain_info: "auto",     };     w[g] = function (i, j) {       w["SSJSConnectorObj"][i] = j;     };     a = d.createElement(e);     a.async = true;     if (       navigator.userAgent.indexOf('MSIE') !== -1 ||       navigator.appVersion.indexOf('Trident/') > -1     ) {       u = u.replace("/advanced/", "/advanced/ie/");     }     a.src = u;     b = d.getElementsByTagName(e)[0];     b.parentNode.insertBefore(a, b);   })(     window, document, "script", "https://www.dhs.state.mn.us/18f5227b-e27b-445a-a53f-f845fbe69b40/stormcaster.js", "ccfp", "ssConf"   );   ssConf("c1", "https://www.dhs.state.mn.us");   ssConf("c3", "c99a4269-161c-4242-a3f0-28d44fa6ce24");   ssConf("au", "dhs.state.mn.us");   ssConf("cu", "validate.perfdrive.com, ssc"); </script></head>
+<body>
+<a href="#top" id="scroll" style="display:none; z-index:1000;" title="return to top of the page"><span></span></a>
+<a name="top" id="top"></a>
+
+<!-- Skip to links -->
+<div class="w3-row w3-right-align">
+	<span class="w3-small" id="skipLinks">Skip To: <a href="#mainContent">Main Content</a> | <a href="#divSidebar">Subnavigation</a> |</span>
+</div>
+
+<!-- Navbar -->
+<header class="w3-row">
+	<div class="w3-container">
+		<div class="w3-row" style="padding-bottom:12px;">
+			<div class="w3-third w3-left-align w3-mobile w3-padding">
+				<a href="https://mn.gov/dhs"><img id="w3css_dhs_logo" style="max-width:309px !important; max-height:72px !important;" class="w3-image w3-mobile" src="/main/groups/dev/documents/webasset/mn_logo_svg.svg" alt="Minnesota" border="0"></a>
+			</div>
+			<div class="w3-third w3-center w3-mobile w3-padding">
+				<a href="/main/idcplg?IdcService=GET_DYNAMIC_CONVERSION&RevisionSelectionMethod=LatestReleased&dDocName=COUNTYLINK_HOME"><img id="w3css_countylink_logo" style="width:100%;max-width:220px;" class="w3-image w3-mobile" src="/main/groups/dev/documents/webasset/w3css_partnerlink_logo.svg" alt="PartnerLink - A resource for counties and tribes" border="0"></a>
+			</div>
+			<div class="w3-third w3-right-align w3-mobile w3-display-topright">
+				&nbsp;
+			</div>
+		</div>
+	</div>
+
+	<div class="w3-bar w3-small" id="topnav">
+		<div class="w3-row">
+			<div class="w3-left-align w3-half w3-small">
+				<a href="/main/idcplg?IdcService=GET_DYNAMIC_CONVERSION&RevisionSelectionMethod=LatestReleased&dDocName=COUNTYLINK_HOME" class="w3-button w3-mobile w3-hover-mngreen">PartnerLink Home</a>
+				<a href="https://mn.gov/dhs" class="w3-bar-item w3-button w3-mobile w3-hover-mngreen">DHS Home</a>
+				<a href="https://mn.gov/dhs/general-public/publications-forms-resources/bulletins/index.jsp" class="w3-bar-item w3-button w3-mobile w3-hover-mngreen">Bulletins</a>
+				<a href="http://mn.gov/dhs/general-public/publications-forms-resources/edocs/index.jsp" class="w3-button w3-mobile w3-hover-mngreen">eDocs</a>
+				<a href="/main/idcplg?IdcService=GET_DYNAMIC_CONVERSION&RevisionSelectionMethod=LatestReleased&dDocName=COUNTYLINK_AZ" class="w3-bar-item w3-button w3-mobile w3-hover-mngreen">A-Z Topics</a>
+			</div>
+			<div class="w3-half w3-right-align w3-padding-small">
+				<form name="frmKeySearch" id="frmKeySearch" method="post" action="/main/idcplg?IdcService=GET_DYNAMIC_CONVERSION&RevisionSelectionMethod=LatestReleased&dDocName=COUNTYLINK_SEARCHRESULTS" style="" class="w3-mobile">
+
+					<input id="txtKeyword" name="KW" class="ui-autocomplete-input" type="text" size="30" maxlength="99" placeholder="keyword search...">
+					<button id="btnSearch" name="btnSearch" onclick="sanitizeQS()"><i class="fas fa-search"></i></button>
+					
+				</form>
+			</div>
+		</div>
+	</div>
+	
+	<div class="w3-bar w3-row w3-small mn-cl-gray-bg" id="graynav">
+		<div class="w3-left-align w3-rest">
+			<a href="/main/idcplg?IdcService=GET_DYNAMIC_CONVERSION&RevisionSelectionMethod=LatestReleased&dDocName=County_Reports" class="w3-bar-item w3-button w3-mobile">County Reports/Results</a>
+			<a href="/main/idcplg?IdcService=GET_DYNAMIC_CONVERSION&RevisionSelectionMethod=LatestReleased&dDocName=Program_Resources" class="w3-bar-item w3-button w3-mobile">DHS Program Resources</a>
+			<a href="/main/idcplg?IdcService=GET_DYNAMIC_CONVERSION&RevisionSelectionMethod=LatestReleased&dDocName=System_Updates" class="w3-bar-item w3-button w3-mobile">DHS Systems &amp; IT Updates</a>
+			<a href="/main/idcplg?IdcService=GET_DYNAMIC_CONVERSION&RevisionSelectionMethod=LatestReleased&dDocName=Fiscal_Reporting" class="w3-bar-item w3-button w3-mobile">Fiscal Reporting &amp; Accounting</a>
+			<a href="/main/idcplg?IdcService=GET_DYNAMIC_CONVERSION&RevisionSelectionMethod=LatestReleased&dDocName=Manuals" class="w3-bar-item w3-button w3-mobile">Manuals</a>
+			<a href="/main/idcplg?IdcService=GET_DYNAMIC_CONVERSION&RevisionSelectionMethod=LatestReleased&dDocName=Policy_Inquiries" class="w3-bar-item w3-button w3-mobile">Policy Inquiries</a>
+			<a href="/main/idcplg?IdcService=GET_DYNAMIC_CONVERSION&RevisionSelectionMethod=LatestReleased&dDocName=Training" class="w3-bar-item w3-button w3-mobile mn-blue-bg mn-white-color mn-cl-here">Trainlink</a>
+			<a href="/main/idcplg?IdcService=GET_DYNAMIC_CONVERSION&RevisionSelectionMethod=LatestReleased&dDocName=dhs16_191395" class="w3-bar-item w3-button w3-mobile">Performance Management</a>
+		</div>
+	</div>	
+</header>
+
+<div class="w3-container" id="pageContent">
+	<div class="w3-row w3-stretch">
+		<div class="w3-quarter w3-padding w3-stretch" id="divSidebar">
+		</div>
+		<div class="w3-threequarter w3-padding" id="mainContent">
+<span id="bcTxt">
+		
+			
+			<i class="fas fa-chevron-right"></i>
+			<a href="/main/idcplg?IdcService=GET_DYNAMIC_CONVERSION&RevisionSelectionMethod=LatestReleased&dDocName=Training">TrainLink</a>
+			
+</span>
+<p id="_top">Limited English Proficiency (LEP) Plan</span></p>
+<p>Name of your Organization</span></p>
+<ol>
+<li> Purpose</li>
+</ol>
+<p>The purpose of this plan is to document the policies and procedures as it applies to providing meaningful access (language access) to individuals with Limited English Proficiency (LEP) while accessing services and information at Name of your Organization in City, MN.  </span></p>
+<ol start="2">
+<li> Authorities</li>
+</ol>
+<ul>
+<li>Title VI of the Civil Rights Act of 1964, 42 U.S.C. §2000 et seq.; 45 CFR §80, Nondiscrimination Under Programs Receiving Federal Financial Assistance through the U.S. Department of Health and Human Services Effectuation of Title VI of the Civil Rights Act of 1964.</li>
+<li>Office for Civil Rights Policy Guidance, Guidance to Federal Financial Assistance Recipients Regarding Title VI Prohibition Against National Origin Discrimination Affecting Limited English Proficient Persons, 68FR 47311 (2003). <a href="http://www.hhs.gov/ocr/civilrights/resources/specialtopics/lep/policyguidancedocument.html"><span>http://www.hhs.gov/ocr/civilrights/resources/specialtopics/lep/policyguidancedocument.html</span></a> </li>
+<li>Department of Justice regulation, 28 CFR §42.405(d)(1), Department of Justice, Coordination of Enforcement of Non-discrimination in Federally Assisted Programs, Requirements for Translation. <a href="http://www.justice.gov/crt/grants_statutes/corregt6.txt"><span>http://www.justice.gov/crt/grants_statutes/corregt6.txt</span></a></li>
+<li>Communications Services, Minnesota Status § 15.441, subd (1), (2), (3), (4). <a href="https://www.revisor.leg.state.mn.us/statutes/?id=15.441&amp;format=pdf"><span>https://www.revisor.leg.state.mn.us/statutes/?id=15.441&amp;format=pdf</span></a> </li>
+<li>Information for persons with limited English language proficiency, Minnesota Status §256.01 subd 16. <a href="https://www.revisor.mn.gov/statutes/?id=256.01"><span>https://www.revisor.mn.gov/statutes/?id=256.01</span></a> </li>
+</ul>
+<p></span></p>
+<ol start="3">
+<li>Definitions</li>
+</ol>
+<ul>
+<li>Culturally appropriate services – utilization or application of services, testing, and any other methodology that does not have the effect of subjecting individuals with LEP, and/or their families to discrimination because of their race, color, or national origin, or do not have the effect of defeating or substantially impairing accomplishment of the objectives of the program with respect to individuals of a particular race, color, or national origin.- 45 CFR 80.3(b)(2).</li>
+<li>Effective communication - In a healthcare delivery setting such as your field, effective communication occurs when provider staff have taken the necessary steps to make sure that a person with Limited English Proficiency is given adequate information to understand the services and benefits available and receives the information and services for which they are eligible. Effective communication also means that a person with Limited English Proficiency (LEP) is able to communicate the relevant circumstances of their situation to the provider.</li>
+<li>Individual with Limited English Proficiency (LEP)  - A person with Limited English Proficiency or “LEP” is not able to speak, read, write or understand the English language well enough to allow them to interact effectively with healthcare,  social services agencies, and other providers.</li>
+<li>Interpreting - Interpreting means the oral or spoken transfer of a message from the source language into the target language. There are different modes of interpretation such as consecutive, simultaneous, sight-translation, and summarization.</li>
+<li>Meaningful access - Meaningful access to programs, information, and services is the standard of access required of federally funded entities to comply with Title VI’s language access requirements. To ensure meaningful access for people with Limited English Proficiency, service providers must make available to patients and their families free of charge and without undue delay language assistance that results in accurate and effective communication.</li>
+<li>Office for Civil Rights (OCR) - The Office for Civil Rights is the civil rights enforcement agency of the U.S. Department of Health and Human Services. OCR Region V is the regional office that enforces Title VI in Minnesota for health and human services agencies and providers.</li>
+<li>Primary languages - Primary languages are the languages other than English that are most commonly spoken by clientele as identified by Name of your Organization collection of demographic data. Currently there are __ primary languages: _________, ____________, _____________, and ____________.</li>
+<li>Translation - Translation means the written transfer of a message from the source language into the target language.</li>
+</ul>
+<p class="ID96A"></span></p>
+<ol start="4">
+<li>Methods of Providing Services to individuals with LEP</li>
+</ol>
+<p>The primary methods used are: (you must list them here)</span></p>
+<p>Contracted Qualified Interpreters: (you must list who they are or what agencies are the ones your business contracts with)</span></p>
+<p>Telephone Interpreter Services: (you must list who the organization(s) is that provides your staff access to telephonic services)</span></p>
+<p>Video Remote Interpreting (VRI) Services: (you must list who the organization(s) is that provides the VRI services to your staff)</span></p>
+<p>LEP Liaison &amp; Coordinator: (you must list who the central point of contact and coordination is for your practice, and how to contact that individual)</span></p>
+<p> LEP Liaison Back-up: (you must list here who the back-up person is for the main LEP coordinator)</span></p>
+<ol start="5">
+<li>Interpreter Services</li>
+</ol>
+<p>Name of your Organization, without undue delay and at no cost to individuals with LEP and/or their families, provides meaningful access to information and service to all individuals with LEP and/or their families receiving services.</span></p>
+<ol start="6">
+<li>Translation of Documents</li>
+</ol>
+<p>Name of your Organization contracts qualified translators or translating agencies to assist individuals with LEP in translating all vital documents, or documents needed to perform services.  </span></p>
+<ol start="7">
+<li>Dissemination and Mandatory Training  to Agency Staff , Volunteers, and Others</li>
+</ol>
+<p>Name of your Organization is committed to providing LEP training to:</span></p>
+<ul>
+<li>All staff at new employee orientation, AND</li>
+<li>At least once a year to all staff, volunteers, and contractors</li>
+</ul>
+<p>Name of your Organization will keep record of those training sessions and individual record of attendance to training will be part of personnel files. Record of this training will be kept for a minimum of five years and readily available during DHS audits, investigations, or any proceeding and as required by the law.</span></p>
+<p> This training is to include at least the following:</span></p>
+<ul>
+<li>Title VI of the Civil Rights Act of 1964 </li>
+<li>How to work effectively with interpreters, and </li>
+<li>Any other cultural issues related to delivery of information and services to individuals with LEP served by Name of your Organization.</li>
+</ul>
+<p>This policy is added to the Manual of Policies and Procedures of Name of your Organization.</span></p>
+<p>Dissemination of Language Access Information in Public Areas</span></p>
+<p>Name of your Organization makes available to individuals with LEP:</span></p>
+<ul>
+<li>Notice of language access services by posting in public areas the  “<a href="https://edocs.dhs.state.mn.us/lfserver/Legacy/DHS-4739-ENG"><span>Language Poster</span></a>”, available through DHS public Web site (<a href="https://edocs.dhs.state.mn.us/lfserver/Legacy/DHS-4739-ENG"><span>https://edocs.dhs.state.mn.us/lfserver/Legacy/DHS-4739-ENG</span></a> )</li>
+<li>“<a href="https://edocs.dhs.state.mn.us/lfserver/Legacy/DHS-4374-ENG"><span>I need an interpreter</span></a>” card available in ten languages and from DHS public Web site (<a href="https://edocs.dhs.state.mn.us/lfserver/Legacy/DHS-4374-ENG"><span>https://edocs.dhs.state.mn.us/lfserver/Legacy/DHS-4374-ENG</span></a> )</li>
+</ul>
+<p class="IDC5E"></span></p>
+<ol start="8">
+<li>Annual Review of LEP Plan</li>
+</ol>
+<p>Name of your Organization reviews annually its LEP plan to adjust or modify its contingencies based on demographic data collected by Name of your Organization during its delivery of information and services to individuals with LEP throughout the year.</span></p>
+<p style="border-top: 0px none Black; border-bottom: 0px none Black"></span></p>
+<p>Name of your Organization upon DHS request will complete and submit DHS LEP Plan review on an annual basis or as often as requested by DHS.</span></p>
+<p style="border-top: 0px none Black"></span></p>
+<ol start="9">
+<li>Collection of Data &amp; Its Analysis</li>
+</ol>
+<p>Name of your Organization is committed to monitor and make reasonable adjustments to comply with Title VI requirements. Name of your Organization will collect:</span></p>
+<ul>
+<li>Name the type of data your organization will collect demographic  data e.g. DOB, gender, preferred spoken language, preferred written language, needs interpreter (Yes, No), cultural background</li>
+<li>Purpose of collecting these data</li>
+<li>Measured outcomes</li>
+<li>Etc.</li>
+</ul>
+<p></span></p>
+<ol start="10">
+<li>Complaint Process:</li>
+</ol>
+<p>Individuals with LEP have the right to file a formal complaint with:</span></p>
+<ul>
+<li>Name of your Organization:</li>
+<li>Name of Person to whom complaints can be addressed<br />
+Phone number</li>
+</ul>
+<p>Mailing address</span></p>
+<p>Email address</span></p>
+<ul>
+<li>Minnesota Department of Human Services (DHS), Limited English Proficiency (LEP) Coordinator:</li>
+<li>Alejandro Maldonado<br />
+651-431-4018<br />
+P.O. Box 64997<br />
+Saint Paul, MN<br />
+55164-0997</li>
+</ul>
+<p><a href="mailto:alejandro.maldonado@state.mn.us"><span>alejandro.maldonado@state.mn.us</span></a></span></p>
+<p>Fax&#160; 651-431-7444 </span></p>
+<p>MN Relay&#160; 711 or&#160; 1-800-627-3529</span></p>
+<ul>
+<li>Office for Civil Rights (OCR), Region V – Chicago, IL</li>
+<li>Celeste Davis, Regional Manager<br />
+Office for Civil Rights<br />
+U.S. Department of Health and Human Services<br />
+233 N. Michigan Ave., Suite 240<br />
+Chicago, IL 60601<br />
+Voice Phone (800) 368-1019<br />
+FAX 312-886-1807<br />
+TDD 800- 537-7697</li>
+<li><a href="http://www.hhs.gov/ocr/civilrights/complaints/index.html"><span>http://www.hhs.gov/ocr/civilrights/complaints/index.html</span></a></li>
+</ul>
+<p>This LEP Plan is available in public areas of  Name of your Organization, to all staff, volunteer, and contractors, and to members of the community.</span></p>
+<p>Revisions to this LEP Plan</span></p>
+<p>Creation&#160;&#160;&#160;&#160;Month YYYY&#160;&#160;&#160;&#160;By Your Name</span></p>
+<p>No changes made at this time as this is the creation of the LEP plan.</span></p>
+<p>First Revision&#160;&#160;&#160;&#160;</span></p>
+<p>Second Revision&#160;&#160;</span></p>
+<p style="border-top: 0px none Black"></span></p>
+			<!-- report page -->
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-YE6VQG1XG7"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-YE6VQG1XG7');
+</script>
+
+<script src="https://www.google.com/recaptcha/api.js" async defer></script>
+<script>
+function subForm() {
+	alert("Thank you for your feedback!");
+	document.getElementById("frmReportPage").submit();
+}
+</script>
+
+<div class="w3-row">
+
+	<p class="w3-medium"><b><a href="javascript:showRate()"><img src="/main/groups/dev/documents/webasset/reportpage.gif" alt="" style="border-width:0px; margin-right:10px;">Report this page</a></b></p>
+		
+	<div id="divReportPage" style="width:320px;">
+		
+		<form name="frmReportPage" id="frmReportPage" method="post" action="/ratepage/_processform.asp">
+			<input type="hidden" name="V7" id="V7" value="2/9/17 8:41 AM">
+			<input type="hidden" name="V8" id="V8" value="pwama23">
+			<input type="hidden" name="V9" id="V9" value="DHS-292657">
+			<input type="hidden" name="V10" id="V10" value="5/26/25 9:17 PM">
+			<input type="hidden" name="V11" id="V11" value="County_Access">
+			<input type="hidden" name="V12" id="V12" value="1">
+			<input type="hidden" name="V13" id="V13" value="42753">
+			<input type="hidden" name="V14" id="V14" value="1">
+			<input type="hidden" name="V15" id="V15" value="ann.boerth">
+			<input type="hidden" name="V23" id="V23" value="Limited%20English%20Proficiency%20%28LEP%29%20Template">
+			<input type="hidden" name="V27" id="V27" value="CountyLink">
+			<input type="hidden" name="ref" id="ref" value="">
+			<input type="hidden" name="txtAnswer" id="txtAnswer" value="4">
+					
+			<table id="tblReport">
+				<tr>
+					<td class="al" width="50%"><label for="selIssue">Issue:</label></th>
+					<td class="al" width="50%">
+						<select name="selIssue" id="selIssue" size="1" class="txt" style="width:100%;">
+							<option value="5">[select]</option>
+							<option value="1">Bad/Broken link</option>
+							<option value="2">Spelling/Grammar</option>
+							<option value="6">Need more info</option>
+							<option value="3">Page content</option>
+							<option value="4">Page displays improperly</option>
+							<option value="7">Accessibility</option>
+							<option value="5">Other (please specify)</option>				
+						</select>
+					</td>
+				</tr>
+				<tr>
+					<td class="al" width="50%"><label for="txtEmail">Email:</label></th>
+					<td class="al" width="50%"><input type="email" name="txtEmail" id="txtEmail" size="20" maxlength="99" class="txt" style="width:100%;"></td>
+				</tr>
+				<tr>
+					<td colspan="2" class="al" width="100%">
+						<label for="txtDetails" id="lblDetails">Comments:</label><br>
+						<textarea name="txtDetails" id="txtDetails" cols="40" rows="4" class="txt" style="width:100%;"></textarea>
+					</td>
+			
+				</tr>
+				
+				<tr>
+					<td colspan="2" class="ac" style="padding:10px 2px; text-align:center;">
+						<div class="g-recaptcha" data-sitekey="6Lf3PecUAAAAAHpRr9ntg0uwn4keBBg9OgLiE2GE" style="width:100%;"></div>
+					</td>
+				</tr>
+				
+				<tr>
+					<td colspan="2" class="ac" style="text-align:center;">
+						<input type="reset" id="btnReset" value="RESET" class="w3-button" style="margin-right:20px; border:1px solid #000;">
+						<input type="button" id="btnSubmit" value="SUBMIT" class="w3-button" style="margin-left:20px; border:1px solid #000;" onclick="subForm()">
+					</td>
+				</tr>
+			</table>
+						
+		</form>		
+		
+	
+	
+	
+	</div>
+	
+</div>
+
+
+
+
+	
+	
+		<!--IDOC File DHS-292657_IDOC not found.-->
+		</div>
+	</div>
+</div>
+
+<footer>
+	<div class="w3-container w3-padding-small">
+		<div class="w3-row w3-container">
+			<div class="w3-half w3-left-align w3-small">&copy;  Minnesota Department of Human Services</div>
+			<div class="w3-half w3-right-align w3-small">
+				Updated: 2/9/17 8:41 AM
+				|<a href="https://mn.gov/dhs/general-public/policies/accessibility.jsp">Accessibility</a>|<a href="https://mn.gov/dhs/general-public/policies/index.jsp">Terms/Policy</a>|<a href="http://mn.gov/dhs/general-public/about-dhs/contact-us/index.jsp">Contact DHS</a>|<a href="#top">Top of Page</a>|
+			</div>
+		</div>
+	</div>
+</footer>
+
+<script>
+$(document).ready(function() {
+	$(window).scroll(function(){ 
+		if ($(this).scrollTop() > 100) { 
+			$("#scroll").fadeIn(); 
+		} else { 
+			$("#scroll").fadeOut(); 
+		} 
+	}); 
+	$("#scroll").click(function(){ 
+		$("html, body").animate({ scrollTop: 0 }, 600); 
+		return false; 
+	}); 	
+});
+
+</script>
+
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-45550774-1', 'state.mn.us');
+  ga('send', 'pageview', '/CountyLink/Training/None/None/None/None/DHS-292657');
+
+</script>
+
+
+
+</body>
+</html>

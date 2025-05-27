@@ -6,9 +6,15 @@ import json
 import numpy as np
 from typing import List, Dict, Any, Tuple, Optional
 import re
+from .structured_data_service import StructuredDataService
 
 # Configure logging
 logger = logging.getLogger(__name__)
+
+# Enhanced configuration for better coverage
+DEFAULT_NUM_NEIGHBORS = 15  # Increased from 5 for better coverage
+DEFAULT_KEYWORD_RESULTS = 20  # Increased for better coverage
+DEFAULT_HYBRID_RESULTS = 12  # Increased for better coverage
 
 # Path to the scraped data file
 # When running in Docker, the file will be in /app directory
@@ -65,10 +71,35 @@ def _load_data() -> List[Dict[str, Any]]:
 
 # Cache the loaded data
 _cached_data = None
+_structured_data_service = None
+
+def get_structured_data_service() -> StructuredDataService:
+    """Get or initialize the structured data service"""
+    global _structured_data_service
+    if _structured_data_service is None:
+        _structured_data_service = StructuredDataService()
+    return _structured_data_service
+
+def _load_data_with_structured() -> List[Dict[str, Any]]:
+    """Load both regular and structured data"""
+    data = _load_data()  # Load regular data
+    
+    # Add structured data
+    try:
+        structured_service = get_structured_data_service()
+        structured_entries = structured_service.to_vector_db_format()
+        
+        logger.info(f"Adding {len(structured_entries)} structured data entries")
+        data.extend(structured_entries)
+        
+    except Exception as e:
+        logger.warning(f"Could not load structured data: {e}")
+    
+    return data
 
 def find_neighbors(query_embedding: List[float], num_neighbors_override: Optional[int] = None) -> List[Tuple[str, float]]:
     """
-    Find nearest neighbors to the query embedding in the local data.
+    Find nearest neighbors to the query embedding in the local data (including structured data).
     
     Args:
         query_embedding: The embedding vector to search for
@@ -79,16 +110,16 @@ def find_neighbors(query_embedding: List[float], num_neighbors_override: Optiona
     """
     global _cached_data
     
-    # Load data if not already cached
+    # Load data if not already cached (including structured data)
     if _cached_data is None:
-        _cached_data = _load_data()
+        _cached_data = _load_data_with_structured()
     
     if not _cached_data:
         logger.warning("No data loaded for vector search.")
         return []
     
-    # Number of neighbors to return
-    num_neighbors = num_neighbors_override or 5
+    # Number of neighbors to return (increased default for better coverage)
+    num_neighbors = num_neighbors_override or DEFAULT_NUM_NEIGHBORS
     
     # Calculate similarity with each chunk
     results = []
@@ -104,9 +135,9 @@ def find_neighbors(query_embedding: List[float], num_neighbors_override: Optiona
     results.sort(key=lambda x: x[1], reverse=True)
     return results[:num_neighbors]
 
-def keyword_search(keywords: List[str], num_results: int = 10) -> List[Tuple[str, int]]:
+def keyword_search(keywords: List[str], num_results: int = None) -> List[Tuple[str, int]]:
     """
-    Search for chunks containing specific keywords
+    Search for chunks containing specific keywords (including structured data)
     
     Args:
         keywords: List of keywords to search for
@@ -117,13 +148,17 @@ def keyword_search(keywords: List[str], num_results: int = 10) -> List[Tuple[str
     """
     global _cached_data
     
-    # Load data if not already cached
+    # Load data if not already cached (including structured data)
     if _cached_data is None:
-        _cached_data = _load_data()
+        _cached_data = _load_data_with_structured()
     
     if not _cached_data:
         logger.warning("No data loaded for keyword search.")
         return []
+    
+    # Use enhanced default for better coverage
+    if num_results is None:
+        num_results = DEFAULT_KEYWORD_RESULTS
     
     logger.info(f"Performing keyword search for: {keywords}")
     
@@ -170,11 +205,11 @@ def keyword_search(keywords: List[str], num_results: int = 10) -> List[Tuple[str
 def hybrid_search(
     query_embedding: List[float], 
     keywords: List[str],
-    num_results: int = 10,
+    num_results: int = None,
     vector_weight: float = 0.7
 ) -> List[Tuple[str, float]]:
     """
-    Perform hybrid search combining vector similarity and keyword matching
+    Perform enhanced hybrid search combining vector similarity and keyword matching
     
     Args:
         query_embedding: The embedding vector for semantic search
@@ -185,23 +220,40 @@ def hybrid_search(
     Returns:
         List of (chunk_id, combined_score) tuples
     """
+    # Use enhanced default for better coverage
+    if num_results is None:
+        num_results = DEFAULT_HYBRID_RESULTS
+        
     logger.info(f"Performing hybrid search with vector_weight={vector_weight}")
     
-    # Get vector search results
-    vector_results = find_neighbors(query_embedding, num_results * 2)  # Get more for better coverage
+    # Get vector search results with expanded coverage
+    vector_results = find_neighbors(query_embedding, num_results * 3)  # Get more for better coverage
     
-    # Get keyword search results
-    keyword_results = keyword_search(keywords, num_results * 2)
+    # Get keyword search results with expanded coverage
+    keyword_results = keyword_search(keywords, num_results * 3)
+    
+    # Check for structured data matches first (prioritize exact facts)
+    structured_matches = search_structured_data(keywords)
     
     # Combine scores
     combined_scores = {}
+    
+    # Prioritize structured data matches (give them highest scores)
+    structured_boost = 1.5  # Boost factor for structured data
+    for chunk_id, relevance_score in structured_matches:
+        combined_scores[chunk_id] = relevance_score * structured_boost
     
     # Add vector scores (normalized)
     if vector_results:
         max_vector_score = max(score for _, score in vector_results)
         for chunk_id, score in vector_results:
             normalized_score = score / max_vector_score if max_vector_score > 0 else 0
-            combined_scores[chunk_id] = vector_weight * normalized_score
+            vector_contribution = vector_weight * normalized_score
+            
+            if chunk_id in combined_scores:
+                combined_scores[chunk_id] += vector_contribution
+            else:
+                combined_scores[chunk_id] = vector_contribution
     
     # Add keyword scores (normalized)
     if keyword_results:
@@ -220,6 +272,99 @@ def hybrid_search(
     results.sort(key=lambda x: x[1], reverse=True)
     
     return results[:num_results]
+
+def search_structured_data(keywords: List[str]) -> List[Tuple[str, float]]:
+    """
+    Search specifically in structured data for keyword matches
+    
+    Args:
+        keywords: List of keywords to search for
+        
+    Returns:
+        List of (chunk_id, relevance_score) tuples
+    """
+    try:
+        structured_service = get_structured_data_service()
+        matches = []
+        
+        for keyword in keywords:
+            # Search for entries matching keywords
+            matching_entries = structured_service.search_entries(keyword)
+            
+            for entry in matching_entries:
+                relevance_score = 1.0
+                
+                # Higher relevance for provider-related queries
+                if any(provider_keyword in keyword.lower() for provider_keyword in 
+                      ['provider', 'count', 'number', 'total', 'how many']):
+                    if 'provider' in entry.key.lower():
+                        relevance_score = 2.0
+                
+                # Higher relevance for exact key matches
+                if keyword.lower() in entry.key.lower():
+                    relevance_score *= 1.5
+                
+                chunk_id = f"structured_{entry.id}"
+                matches.append((chunk_id, relevance_score))
+        
+        # Remove duplicates and sort by relevance
+        unique_matches = {}
+        for chunk_id, score in matches:
+            if chunk_id not in unique_matches or unique_matches[chunk_id] < score:
+                unique_matches[chunk_id] = score
+        
+        sorted_matches = [(chunk_id, score) for chunk_id, score in unique_matches.items()]
+        sorted_matches.sort(key=lambda x: x[1], reverse=True)
+        
+        return sorted_matches
+        
+    except Exception as e:
+        logger.warning(f"Error searching structured data: {e}")
+        return []
+
+def get_provider_statistics() -> Dict[str, Any]:
+    """
+    Get current provider statistics from structured data
+    
+    Returns:
+        Dictionary containing provider statistics
+    """
+    try:
+        structured_service = get_structured_data_service()
+        return structured_service.get_provider_stats()
+    except Exception as e:
+        logger.error(f"Error getting provider statistics: {e}")
+        return {}
+
+def update_provider_data(total_count: int, by_county: Optional[Dict[str, int]] = None,
+                        source: str = "Minnesota DHS Provider Directory",
+                        source_url: Optional[str] = None) -> bool:
+    """
+    Update provider count data in structured storage
+    
+    Args:
+        total_count: Total number of EIDBI providers
+        by_county: Optional breakdown by county
+        source: Data source name
+        source_url: URL of the data source
+        
+    Returns:
+        True if successful, False otherwise
+    """
+    try:
+        structured_service = get_structured_data_service()
+        structured_service.update_provider_count(total_count, by_county, source, source_url)
+        
+        # Clear cache to force reload with new data
+        global _cached_data
+        _cached_data = None
+        
+        logger.info(f"Updated provider data: {total_count} total providers")
+        return True
+        
+    except Exception as e:
+        logger.error(f"Error updating provider data: {e}")
+        return False
 
 def get_chunk_by_id(chunk_id: str) -> Optional[Dict[str, Any]]:
     """
