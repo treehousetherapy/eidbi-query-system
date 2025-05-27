@@ -13,6 +13,12 @@
 - ✅ **DNS**: Properly configured through Cloudflare
 - ✅ **Service**: `eidbi-web-frontend` revision `eidbi-web-frontend-00004-v84`
 
+### **Frontend Deployment Details**
+- ✅ **Primary URL**: https://askeidbi.org (custom domain)
+- ✅ **Cloud Run URL**: https://eidbi-web-frontend-5geiseeama-uc.a.run.app
+- ✅ **Backend API**: Configured to point to `https://eidbi-backend-service-5geiseeama-uc.a.run.app`
+- ✅ **Architecture**: Frontend → Backend → Enhanced Knowledge Base (421 chunks)
+
 ### **Backend Integration**
 - ✅ **API Endpoint**: https://eidbi-backend-service-5geiseeama-uc.a.run.app
 - ✅ **Health Status**: Healthy (v2.0.0)
@@ -63,6 +69,16 @@ All deployment tests **PASSED** ✅:
 - ✅ **Performance**: Sub-second response times
 - ✅ **Reliability**: Auto-scaling, health monitoring
 
+### **Frontend Configuration**
+```javascript
+// web-frontend/js/chat.js
+const API_URL = 'https://eidbi-backend-service-5geiseeama-uc.a.run.app';
+```
+- Frontend makes API calls to the backend service
+- Hybrid search enabled with reranking
+- 5 results per query by default
+- Modern ChatGPT-style interface
+
 ## 🌐 Access Information
 
 ### **Public URL**
@@ -73,6 +89,18 @@ All deployment tests **PASSED** ✅:
 - **Backend**: https://eidbi-backend-service-5geiseeama-uc.a.run.app
 - **Health Check**: https://eidbi-backend-service-5geiseeama-uc.a.run.app/health
 - **Query API**: https://eidbi-backend-service-5geiseeama-uc.a.run.app/query
+
+### **Cloud Run Services**
+| Service | URL | Purpose |
+|---------|-----|---------|
+| **eidbi-web-frontend** | https://eidbi-web-frontend-5geiseeama-uc.a.run.app | Frontend UI (mapped to askeidbi.org) |
+| **eidbi-backend-service** | https://eidbi-backend-service-5geiseeama-uc.a.run.app | API backend with enhanced data |
+| **eidbi-frontend-service** | https://eidbi-frontend-service-5geiseeama-uc.a.run.app | Legacy frontend service |
+
+### **Domain Mapping**
+- **askeidbi.org** → **eidbi-web-frontend** (us-central1)
+- Managed SSL certificate provided by Google Cloud
+- DNS configured through Cloudflare proxy
 
 ## 📊 Performance Metrics
 
