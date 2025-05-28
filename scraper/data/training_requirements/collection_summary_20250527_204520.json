@@ -1,0 +1,50 @@
+{
+  "collection_date": "2025-05-27T20:45:20.746640",
+  "stats": {
+    "sources_processed": 6,
+    "successful_extractions": 5,
+    "failed_extractions": 1,
+    "total_chunks": 5,
+    "total_text_length": 18870
+  },
+  "sources": [
+    {
+      "name": "Minnesota DHS Required EIDBI Trainings",
+      "url": "https://mn.gov/dhs/partners-and-providers/training-conferences/minnesota-health-care-programs/provider-training/required-eidbi-trainings.jsp",
+      "type": "webpage",
+      "topic": "Training Requirements"
+    },
+    {
+      "name": "DHS Provider Training Document",
+      "url": "https://www.dhs.state.mn.us/main/idcplg?IdcService=GET_DYNAMIC_CONVERSION&RevisionSelectionMethod=LatestReleased&dDocName=dhs-292819",
+      "type": "document",
+      "topic": "Training Requirements"
+    },
+    {
+      "name": "EIDBI Billing and Provider Training",
+      "url": "https://mn.gov/dhs/partners-and-providers/training-conferences/minnesota-health-care-programs/provider-training/eidbi-billing-lab.jsp",
+      "type": "webpage",
+      "topic": "Training Requirements"
+    },
+    {
+      "name": "EIDBI Benefit Overview",
+      "url": "https://mn.gov/dhs/partners-and-providers/news-initiatives-reports-workgroups/long-term-services-and-supports/eidbi/eidbi.jsp",
+      "type": "webpage",
+      "topic": "Training Requirements"
+    },
+    {
+      "name": "State Plan Amendment 23-17",
+      "url": "https://mn.gov/dhs/assets/23-17-spa_tcm1053-584561.pdf",
+      "type": "pdf",
+      "topic": "Training Requirements"
+    },
+    {
+      "name": "EIDBI Licensure Study Report",
+      "url": "https://mn.gov/dhs/partners-and-providers/news-initiatives-reports-workgroups/long-term-services-and-supports/eidbi/licensure-study.jsp",
+      "type": "webpage",
+      "topic": "Training Requirements"
+    }
+  ],
+  "total_items": 5,
+  "output_file": "data\\training_requirements\\eidbi_training_requirements_20250527_204520.jsonl"
+}

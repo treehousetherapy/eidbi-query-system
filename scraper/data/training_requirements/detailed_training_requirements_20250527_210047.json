@@ -1,0 +1,166 @@
+{
+  "metadata": {
+    "source": "DHS Provider Training Document",
+    "source_url": "https://www.dhs.state.mn.us/main/idcplg?IdcService=GET_DYNAMIC_CONVERSION&RevisionSelectionMethod=LatestReleased&dDocName=dhs-292819",
+    "extraction_date": "2025-05-27T21:00:47.652960",
+    "version": "2024-12-11"
+  },
+  "requirements": {
+    "all_providers": {
+      "description": "Required training for ALL EIDBI providers",
+      "trainings": [
+        {
+          "name": "Cultural Responsiveness in Autism Spectrum Disorder (ASD) Services",
+          "course_code": "ASDCULTURE",
+          "platform": "TrainLink",
+          "duration": "Not specified",
+          "format": "Online",
+          "certificate_required": true,
+          "frequency": "One-time requirement",
+          "description": "Helps providers increase understanding of culturally responsive practices when providing services to people with ASD or related conditions"
+        },
+        {
+          "name": "DHS Vulnerable Adults Mandated Reporting (VAMR) Online Course and Exam",
+          "platform": "DHS",
+          "format": "Online course with exam",
+          "certificate_required": true,
+          "frequency": "One-time requirement (but DHS recommends staying informed about updates)",
+          "description": "Legal obligations for mandated reporting of vulnerable adults"
+        },
+        {
+          "name": "Minnesota Child Welfare Training Academy Mandated Reporting Training",
+          "platform": "Minnesota Child Welfare Training Academy",
+          "format": "Online",
+          "certificate_required": true,
+          "frequency": "One-time requirement (but DHS recommends staying informed about updates)",
+          "description": "Legal obligations for mandated reporting of child welfare concerns"
+        }
+      ]
+    },
+    "level_iii_providers": {
+      "description": "Additional required training for Level III providers",
+      "trainings": [
+        {
+          "name": "ASD Strategies in Action",
+          "platform": "Autism Certification Center",
+          "duration": "90-minute introduction + one age-specific module",
+          "format": "Online video-based learning series",
+          "modules": [
+            "90-minute introduction (Many Faces of Autism)",
+            "Toddler and preschool age module",
+            "School age module",
+            "Transition age module"
+          ],
+          "requirement": "Must complete introduction + at least one age-specific module",
+          "features": [
+            "Closed captioning",
+            "Interactive transcripts",
+            "Comprehension checks",
+            "Continuing education credit",
+            "Note-taking tool",
+            "Searchable glossary"
+          ],
+          "exception": "Not required if provider completes behavior assessment and planning with evidence-based interventions online training or successfully completes RBT training",
+          "certificate_required": true,
+          "frequency": "One-time requirement"
+        },
+        {
+          "name": "EIDBI 101: Overview of the Benefit",
+          "course_code": "EIDBI101_P",
+          "platform": "TrainLink",
+          "format": "Online",
+          "topics": [
+            "EIDBI benefit overview",
+            "Provider eligibility",
+            "Covered/non-covered services",
+            "Required training",
+            "SIRS",
+            "Billing and authorizations"
+          ],
+          "certificate_required": true,
+          "frequency": "One-time requirement"
+        }
+      ]
+    },
+    "variance_providers": {
+      "description": "Additional requirements for providers enrolled under certain variances",
+      "applies_to": [
+        "Level I provider variance one",
+        "Level II provider variance two"
+      ],
+      "trainings": [
+        {
+          "name": "ASD Strategies in Action",
+          "details": "Same as Level III requirements"
+        },
+        {
+          "name": "EIDBI 101: Overview of the Benefit",
+          "details": "Same as Level III requirements"
+        }
+      ]
+    },
+    "recommended_trainings": {
+      "description": "Recommended but not required trainings",
+      "all_providers": [
+        {
+          "name": "ASD Strategies in Action",
+          "recommendation": "Especially helpful for providers on variances or with limited clinical experience"
+        },
+        {
+          "name": "EIDBI 101: Overview of the Benefit"
+        },
+        {
+          "name": "Coordinating Services and Supports for a Child with ASD or Related Conditions",
+          "course_code": "Not specified",
+          "description": "Helps professionals make accurate referrals based on person's and family's needs"
+        },
+        {
+          "name": "Telehealth for Early Intervention",
+          "course_code": "EIDBI_Tele",
+          "topics": [
+            "Benefits and barriers of telehealth",
+            "Services offered via telehealth",
+            "Session preparation",
+            "Best-practice guidelines"
+          ]
+        }
+      ],
+      "cmde_itp_providers": [
+        {
+          "name": "CMDE and ITP Overview Training",
+          "course_code": "ASDCMDEITP",
+          "recommended_for": "CMDE providers, QSPs, and any providers who help complete the CMDE or ITP",
+          "topics": [
+            "CMDE overview",
+            "ITP overview",
+            "Step-by-step instructions",
+            "Information gathering strategies"
+          ]
+        }
+      ]
+    }
+  },
+  "compliance": {
+    "timeline": {
+      "requirement": "Within 6 months of hiring date",
+      "note": "DHS requires each individual EIDBI provider to complete their required training(s) within six months of their hiring date"
+    },
+    "frequency": {
+      "requirement": "One-time completion",
+      "note": "Providers are only required to take the EIDBI required trainings one time. If a provider transitions to a new agency, DHS does not require them to complete the trainings again as long as they have maintained documentation"
+    },
+    "documentation": {
+      "requirement": "Maintain in provider file",
+      "details": "The EIDBI provider agency must document each provider's training history, including start and completion dates of orientation and additional EIDBI trainings. The agency must store this information in the provider's file"
+    }
+  },
+  "continuing_education": {
+    "description": "DHS encourages ongoing professional development",
+    "recommendations": [
+      "Participate in relevant ongoing training (workshops, webinars, conferences)",
+      "Stay updated on policies",
+      "Pursue advanced training and certification",
+      "Engage in peer networking and learning"
+    ]
+  }
+}
